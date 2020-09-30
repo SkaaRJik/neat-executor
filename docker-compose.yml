@@ -1,0 +1,14 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    volumes:
+      - ./rabbitmq-config/data/:/var/lib/rabbitmq/
+      - ./rabbitmq-config/logs/:/var/log/rabbitmq/
+    environment:
+      RABBITMQ_ERLANG_COOKIE: 'my-secret-string'
+      RABBITMQ_DEFAULT_USER: 'user'
+      RABBITMQ_DEFAULT_PASS: '1512'
+    ports:
+      - 5672:5672
+      - 15672:15672
