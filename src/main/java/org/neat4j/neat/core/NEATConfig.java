@@ -4,6 +4,7 @@
  */
 package org.neat4j.neat.core;
 
+import lombok.extern.log4j.Log4j2;
 import org.neat4j.core.AIConfig;
 import ru.filippov.neatexecutor.entity.NeatConfigEntity;
 
@@ -18,23 +19,22 @@ import java.util.*;
  * @author MSimmerson
  *
  */
+@Log4j2
 public class NEATConfig implements AIConfig {
 
 
-	private HashMap<String, String> config;
+	private HashMap<String, Object> config;
 
 
 
 	public NEATConfig (NeatConfigEntity neatConfigEntity){
 		this.config = new HashMap(50);
-
 		neatConfigEntity
 				.getNeatSettings()
 				.stream()
-				/*.map(section -> (ArrayList<HashMap<String,Object>>) section.get("params"))*/
-				.forEach(System.out::println);
-
-
+				.map(neatSetting -> neatSetting.getParams())
+				.forEach(neatSettingValues -> neatSettingValues
+						.forEach(neatSettingValue -> this.config.put(neatSettingValue.getName(), neatSettingValue.getValue())));
 	}
 	
 	
@@ -60,17 +60,18 @@ public class NEATConfig implements AIConfig {
 	}
 
 
-	public String configElement(String elementKey) {
-		return ((String)this.config.get(elementKey));
+	public Object configElement(String elementKey) {
+		return this.config.get(elementKey);
 	}
 
-	public void updateConfig(String elementKey, String elementValue) {
+	@Override
+	public void updateConfig(String elementKey, Object elementValue) {
 		this.config.put(elementKey, elementValue);
 	}
 
 	@Override
 	public boolean saveConfig(File dest) throws IOException {
-		if(dest != null) {
+		/*if(dest != null) {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(dest));
 			writer.write("");
 			this.config.entrySet().stream().forEach(o -> {
@@ -87,22 +88,17 @@ public class NEATConfig implements AIConfig {
 			return true;
 		} else {
 			return false;
-		}
+		}*/
+		return false;
 	}
 
 	@Override
-	public HashMap<String, String> getMap() {
+	public HashMap<String, Object> getMap() {
 		return this.config;
 	}
 
 	public List<String> getActivationFunctionsByElementKey(String elementKey){
-		StringTokenizer stringTokenizer = new StringTokenizer(this.configElement(elementKey), ";");
-		List<String> activationFunctions = new ArrayList<>(stringTokenizer.countTokens());
-		while (stringTokenizer.hasMoreTokens()){
-			activationFunctions.add(stringTokenizer.nextToken());
-		}
-		return activationFunctions;
-
+		return (List<String>) this.configElement(elementKey);
 	}
 
 

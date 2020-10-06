@@ -1,26 +1,12 @@
 package org.neat4j.neat.applications.train;
 
 
-import javafx.beans.property.*;
-import javafx.scene.chart.XYChart;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.StackPane;
-import org.apache.log4j.Logger;
-import org.neat4j.core.AIConfig;
-import org.neat4j.core.InitialisationFailedException;
-import org.neat4j.neat.core.NEATGADescriptor;
-import org.neat4j.neat.data.core.DataKeeper;
-import org.neat4j.neat.ga.core.Chromosome;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 public class NEATTrainingForJavaFX extends NEATGATrainingManager implements Runnable {
-    private static final Logger logger = Logger.getLogger(NEATTrainingForJavaFX.class);
+    @Override
+    public void run() {
+
+    }
+ /*   private static final Logger logger = Logger.getLogger(NEATTrainingForJavaFX.class);
     public static final File TEMP_DIRECTORY_PATH = new File( Paths.get("").toAbsolutePath().toString()+"\\temp");
     static {
         if(!TEMP_DIRECTORY_PATH.exists()){
@@ -145,10 +131,10 @@ public class NEATTrainingForJavaFX extends NEATGATrainingManager implements Runn
         currentEpoch = i+1;
 
 
-        /*this.errorData.add();
+        *//*this.errorData.add();
         if(best.getValidationError()!=null){
             this.validationErrorData.add(this.createXYChart(i, best.getValidationError()));
-        }*/
+        }*//*
 
 
 
@@ -226,5 +212,5 @@ public class NEATTrainingForJavaFX extends NEATGATrainingManager implements Runn
 
     public Double getTimeSpend() {
         return timeSpend;
-    }
+    }*/
 }

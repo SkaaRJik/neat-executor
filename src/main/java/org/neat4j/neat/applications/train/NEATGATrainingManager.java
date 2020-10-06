@@ -44,8 +44,7 @@ public class NEATGATrainingManager {
 	 *
 	 */
 	public void initialise(AIConfig config) throws InitialisationFailedException {
-		MathUtils.setSeed(Long.parseLong(config.configElement("GENERATOR.SEED")));
-		config.updateConfig("NATURAL.ORDER.STRATEGY", "true");
+		MathUtils.initRandom((long) config.configElement("GENERATOR.SEED"));
 		this.random = MathUtils.getRand();
 		GADescriptor gaDescriptor = this.createDescriptor(config);
 		this.assigGA(this.createGeneticAlgorithm(gaDescriptor));
@@ -78,7 +77,7 @@ public class NEATGATrainingManager {
 	 *
 	 */
 	public void evolve() {
-		int epochs = Integer.parseInt(config.configElement("NUMBER.EPOCHS"));
+		int epochs = (int)  config.configElement("NUMBER.EPOCHS");
 		double errorValueToTerminate = ((NEATGADescriptor)this.ga.getDescriptor()).getErrorTerminationValue();
 		boolean nOrder = this.ga.getDescriptor().isNaturalOrder();
 		boolean terminate = false;
@@ -100,12 +99,13 @@ public class NEATGATrainingManager {
 	 * Saves the best candidate of the generation
 	 *
 	 */
+	//TODO Make saving
 	public void saveBest() {
-		String pathToSave = config.configElement("SAVE.LOCATION");
+		/*String pathToSave = config.configElement("SAVE.LOCATION");
 		Chromosome chromosome = this.ga.discoverdBestMember();
-		chromosome.setInputs(Integer.parseInt(config.configElement("INPUT.NODES")));
-		chromosome.setOutputs(Integer.parseInt(config.configElement("OUTPUT.NODES")));
-		this.save(pathToSave, chromosome);
+		chromosome.setInputs((int)  config.configElement("INPUT.NODES"));
+		chromosome.setOutputs((int)  config.configElement("OUTPUT.NODES"));
+		this.save(pathToSave, chromosome);*/
 	}
 
 	/**
@@ -114,41 +114,41 @@ public class NEATGATrainingManager {
 	public GADescriptor createDescriptor(AIConfig config) {
 
 		NEATGADescriptor descriptor = new NEATGADescriptor();
-		descriptor.setPAddLink(Double.parseDouble(config.configElement("PROBABILITY.ADDLINK")));
-		descriptor.setPAddNode(Double.parseDouble(config.configElement("PROBABILITY.ADDNODE")));
-		descriptor.setPToggleLink(Double.parseDouble(config.configElement("PROBABILITY.TOGGLELINK")));
-		descriptor.setPMutateBias(Double.parseDouble(config.configElement("PROBABILITY.MUTATEBIAS")));
-		descriptor.setPNewActivationFunction(Double.parseDouble(config.configElement("PROBABILITY.NEWACTIVATIONFUNCTION")));
-		//descriptor.setPXover(Double.parseDouble(config.configElement("PROBABILITY.CROSSOVER")));
-		descriptor.setPMutation(Double.parseDouble(config.configElement("PROBABILITY.MUTATION")));
-		descriptor.setInputNodes(Integer.parseInt(config.configElement("INPUT.NODES")));
-		descriptor.setOutputNodes(Integer.parseInt(config.configElement("OUTPUT.NODES")));
-		descriptor.setNaturalOrder(Boolean.valueOf((config.configElement("NATURAL.ORDER.STRATEGY"))).booleanValue());
-		descriptor.setPopulationSize(Integer.parseInt(config.configElement("POP.SIZE")));
-		descriptor.setDisjointCoeff(Double.parseDouble(config.configElement("DISJOINT.COEFFICIENT")));
-		descriptor.setExcessCoeff(Double.parseDouble(config.configElement("EXCESS.COEFFICIENT")));
-		descriptor.setWeightCoeff(Double.parseDouble(config.configElement("WEIGHT.COEFFICIENT")));
-		descriptor.setThreshold(Double.parseDouble(config.configElement("COMPATABILITY.THRESHOLD")));
-		descriptor.setCompatabilityChange(Double.parseDouble(config.configElement("COMPATABILITY.CHANGE")));
-		descriptor.setMaxSpecieAge(Integer.parseInt(config.configElement("SPECIE.FITNESS.MAX")));
-		descriptor.setSpecieAgeThreshold(Integer.parseInt(config.configElement("SPECIE.AGE.THRESHOLD")));
-		descriptor.setSpecieYouthThreshold(Integer.parseInt(config.configElement("SPECIE.YOUTH.THRESHOLD")));
-		descriptor.setAgePenalty(Double.parseDouble(config.configElement("SPECIE.OLD.PENALTY")));
-		descriptor.setYouthBoost(Double.parseDouble(config.configElement("SPECIE.YOUTH.BOOST")));
-		descriptor.setSpecieCount(Integer.parseInt(config.configElement("SPECIE.COUNT")));
-		descriptor.setPWeightReplaced(Double.parseDouble(config.configElement("PROBABILITY.WEIGHT.REPLACED")));
-		descriptor.setSurvivalThreshold(Double.parseDouble(config.configElement("SURVIVAL.THRESHOLD")));
-		descriptor.setFeatureSelection(Boolean.valueOf(config.configElement("FEATURE.SELECTION")).booleanValue());
-		descriptor.setExtraFeatureCount(Integer.parseInt(config.configElement("EXTRA.FEATURE.COUNT")));
-		descriptor.setEleEvents(Boolean.valueOf(config.configElement("ELE.EVENTS")).booleanValue());
-		descriptor.setEleSurvivalCount(Double.parseDouble(config.configElement("ELE.SURVIVAL.COUNT")));
-		descriptor.setEleEventTime(Integer.parseInt(config.configElement("ELE.EVENT.TIME")));
-		descriptor.setRecurrencyAllowed(Boolean.valueOf(config.configElement("RECURRENCY.ALLOWED")).booleanValue());
-		descriptor.setKeepBestEver(Boolean.valueOf(config.configElement("KEEP.BEST.EVER")).booleanValue());
-		descriptor.setErrorTerminationValue(Double.parseDouble(config.configElement("TERMINATION.VALUE")));
-		descriptor.setMaxPerturb(Double.parseDouble(config.configElement("MAX.PERTURB")));
-		descriptor.setMaxBiasPerturb(Double.parseDouble(config.configElement("MAX.BIAS.PERTURB")));
-		descriptor.setToggleErrorTerminationValue(Boolean.parseBoolean(config.configElement("TERMINATION.VALUE.TOGGLE")));
+		descriptor.setPAddLink((double)  config.configElement("PROBABILITY.ADDLINK"));
+		descriptor.setPAddNode((double)  config.configElement("PROBABILITY.ADDNODE"));
+		descriptor.setPToggleLink((double)  config.configElement("PROBABILITY.TOGGLELINK"));
+		descriptor.setPMutateBias((double)  config.configElement("PROBABILITY.MUTATEBIAS"));
+		descriptor.setPNewActivationFunction((double)  config.configElement("PROBABILITY.NEWACTIVATIONFUNCTION"));
+		//descriptor.setPXover((double)  config.configElement("PROBABILITY.CROSSOVER"));
+		descriptor.setPMutation((double)  config.configElement("PROBABILITY.MUTATION"));
+		descriptor.setInputNodes((int)  config.configElement("INPUT.NODES"));
+		descriptor.setOutputNodes((int)  config.configElement("OUTPUT.NODES"));
+		descriptor.setNaturalOrder((boolean)  config.configElement("NATURAL.ORDER.STRATEGY"));
+		descriptor.setPopulationSize((int)  config.configElement("POP.SIZE"));
+		descriptor.setDisjointCoeff((double)  config.configElement("DISJOINT.COEFFICIENT"));
+		descriptor.setExcessCoeff((double)  config.configElement("EXCESS.COEFFICIENT"));
+		descriptor.setWeightCoeff((double)  config.configElement("WEIGHT.COEFFICIENT"));
+		descriptor.setThreshold((double)  config.configElement("COMPATABILITY.THRESHOLD"));
+		descriptor.setCompatabilityChange((double)  config.configElement("COMPATABILITY.CHANGE"));
+		descriptor.setMaxSpecieAge((int)  config.configElement("SPECIE.FITNESS.MAX"));
+		descriptor.setSpecieAgeThreshold((int)  config.configElement("SPECIE.AGE.THRESHOLD"));
+		descriptor.setSpecieYouthThreshold((int)  config.configElement("SPECIE.YOUTH.THRESHOLD"));
+		descriptor.setAgePenalty((double)  config.configElement("SPECIE.OLD.PENALTY"));
+		descriptor.setYouthBoost((double)  config.configElement("SPECIE.YOUTH.BOOST"));
+		descriptor.setSpecieCount((int)  config.configElement("SPECIE.COUNT"));
+		descriptor.setPWeightReplaced((double)  config.configElement("PROBABILITY.WEIGHT.REPLACED"));
+		descriptor.setSurvivalThreshold((double)  config.configElement("SURVIVAL.THRESHOLD"));
+		descriptor.setFeatureSelection((boolean)  config.configElement("FEATURE.SELECTION"));
+		descriptor.setExtraFeatureCount((int)  config.configElement("EXTRA.FEATURE.COUNT"));
+		descriptor.setEleEvents((boolean)  config.configElement("ELE.EVENTS"));
+		descriptor.setEleSurvivalCount((double)  config.configElement("ELE.SURVIVAL.COUNT"));
+		descriptor.setEleEventTime((int)  config.configElement("ELE.EVENT.TIME"));
+		descriptor.setRecurrencyAllowed((boolean)  config.configElement("RECURRENCY.ALLOWED"));
+		descriptor.setKeepBestEver((boolean)  config.configElement("KEEP.BEST.EVER"));
+		descriptor.setErrorTerminationValue((double)  config.configElement("TERMINATION.VALUE"));
+		descriptor.setMaxPerturb((double)  config.configElement("MAX.PERTURB"));
+		descriptor.setMaxBiasPerturb((double)  config.configElement("MAX.BIAS.PERTURB"));
+		descriptor.setToggleErrorTerminationValue((boolean) config.configElement("TERMINATION.VALUE.TOGGLE"));
 
 		return (descriptor);
 	}
@@ -208,7 +208,7 @@ public class NEATGATrainingManager {
 
 
 	public ParentSelector createParentSelector(AIConfig config) throws InvalidParentSelectorFunction {
-		String pSelectorClass = config.configElement("OPERATOR.PSELECTOR");
+		String pSelectorClass = (String) config.configElement("OPERATOR.PSELECTOR");
 		ParentSelector pSelector;
 
 		if (pSelectorClass != null) {
@@ -251,7 +251,6 @@ public class NEATGATrainingManager {
 			saveOk = true;
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {

@@ -424,16 +424,25 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 			List<String> functions = ((NEATConfig)config).getActivationFunctionsByElementKey("INPUT.ACTIVATIONFUNCTIONS");
 			activationFunctionContainer.setInputActivationFunctions(new ArrayList<>(functions.size()));
 			for(String function : functions){
+				if("".equals(function)) {
+					continue;
+				}
 				activationFunctionContainer.getInputActivationFunctions().add((ActivationFunctionImpl)(Class.forName(function).newInstance()));
 			}
 			functions = ((NEATConfig)config).getActivationFunctionsByElementKey("HIDDEN.ACTIVATIONFUNCTIONS");
 			activationFunctionContainer.setHiddenActivationFunctions(new ArrayList<>(functions.size()));
 			for(String function : functions){
+				if("".equals(function)) {
+					continue;
+				}
 				activationFunctionContainer.getHiddenActivationFunctions().add((ActivationFunctionImpl)(Class.forName(function).newInstance()));
 			}
 			functions = ((NEATConfig)config).getActivationFunctionsByElementKey("OUTPUT.ACTIVATIONFUNCTIONS");
 			activationFunctionContainer.setOutputActivationFunctions(new ArrayList<>(functions.size()));
 			for(String function : functions){
+				if("".equals(function)) {
+					continue;
+				}
 				activationFunctionContainer.getOutputActivationFunctions().add((ActivationFunctionImpl)(Class.forName(function).newInstance()));
 			}
 		} catch (InstantiationException e) {

@@ -37,8 +37,8 @@ public class NEATNetManager implements AIController {
 
 	public NeuralNetDescriptor createNetDescriptor(AIConfig config, boolean init) {
 		NeuralNetDescriptor descriptor = null;
-		int inputLayerSize = Integer.parseInt(config.configElement("INPUT.NODES"));
-		int outputLayerSize = Integer.parseInt(config.configElement("OUTPUT.NODES"));
+		int inputLayerSize = (int) config.configElement("INPUT.NODES");
+		int outputLayerSize = (int) config.configElement("OUTPUT.NODES");
 		// create learnable
 
 			Learnable learnable = this.createLearnable(config, outputLayerSize, init);
@@ -70,7 +70,7 @@ public class NEATNetManager implements AIController {
 
 	public NetworkDataSet dataSet(String keyName, AIConfig config, int opSize) {
 		NetworkDataSet dSet = null;
-		String fileName = config.configElement(keyName);
+		String fileName = (String) config.configElement(keyName);
 		if (fileName != null) {
 			dSet = new CSVDataLoader(fileName, opSize).loadData();
 		}

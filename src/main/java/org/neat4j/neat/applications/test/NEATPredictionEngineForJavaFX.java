@@ -1,17 +1,12 @@
 package org.neat4j.neat.applications.test;
 
-import javafx.beans.property.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import org.neat4j.neat.data.core.*;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
-
 public class NEATPredictionEngineForJavaFX extends MSENEATPredictionEngine implements Runnable {
+    @Override
+    public void run() {
 
-    ObservableList<List<Double>> outs;
+    }
+
+   /* ObservableList<List<Double>> outs;
     ListProperty<List<Double>> outsProperty;
     SimpleObjectProperty<Double> errorProperty = new SimpleObjectProperty<>();
     BooleanProperty isFinished = new SimpleBooleanProperty(false);
@@ -85,5 +80,5 @@ public class NEATPredictionEngineForJavaFX extends MSENEATPredictionEngine imple
 
     public BooleanProperty getIsFinished(){
         return this.isFinished;
-    }
+    }*/
 }

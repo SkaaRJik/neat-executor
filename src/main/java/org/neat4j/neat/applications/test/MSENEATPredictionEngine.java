@@ -24,14 +24,14 @@ public class MSENEATPredictionEngine extends NEATApplicationEngine {
 
 	public void initialise(AIConfig config, boolean initData) throws InitialisationFailedException, IllegalArgumentException {
 		try {
-			Chromosome chromo = (Chromosome) NEATChromosome.readObject(config.configElement("AI.SOURCE"));
+			Chromosome chromo = (Chromosome) NEATChromosome.readObject((String) config.configElement("AI.SOURCE"));
 			// need to create a nn based on this chromo.
 			this.net = this.createNet(config);
 			((NEATNetDescriptor)(this.net().netDescriptor())).updateStructure(chromo);
 			((NEATNeuralNet)this.net()).updateNetStructure();
 			//this.showNet();
-			String testInputs = config.configElement("TEST.INPUTS");
-			String testOutputs = config.configElement("TEST.OUTPUTS");
+			String testInputs = (String) config.configElement("TEST.INPUTS");
+			String testOutputs = (String)  config.configElement("TEST.OUTPUTS");
 
 			List inputs = this.net.inputLayer();
 			List outputs = this.net.outputLayer();
@@ -43,7 +43,7 @@ public class MSENEATPredictionEngine extends NEATApplicationEngine {
 
 
 			// now setup the input data
-			String dataFile = config.configElement("TEST.DATA");
+			String dataFile = (String)  config.configElement("TEST.DATA");
 			if (dataFile != null) {
 				this.netData = new CSVDataLoader(dataFile, outputs.size()).loadData();
 			}

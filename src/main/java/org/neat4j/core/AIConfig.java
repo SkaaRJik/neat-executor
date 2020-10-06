@@ -19,13 +19,13 @@ public interface AIConfig {
 	 * @param elementKey
 	 * @return The configuration value for the given key
 	 */
-	public String configElement(String elementKey);
+	public Object configElement(String elementKey);
 	/**
 	 * Allows updating of configuration getNetOutputs
 	 * @param elementKey
 	 * @param elementValue
 	 */
-	public void updateConfig(String elementKey, String elementValue);
+	public void updateConfig(String elementKey, Object elementValue);
 
 	boolean saveConfig(File file) throws IOException;
 

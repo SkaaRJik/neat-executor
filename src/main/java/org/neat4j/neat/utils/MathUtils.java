@@ -54,7 +54,7 @@ public class MathUtils
         return rand;
     }
 
-    public static void setSeed(long seed){
+    public static void initRandom(long seed){
         rand = new Random(seed);
     }
 }
