@@ -21,12 +21,12 @@ public class NeatDataListener{
     public void consumeNewNeatConfig(Message message) throws IOException {
 
         final NeatConfigEntity neatConfigEntity = new ObjectMapper().readValue(message.getBody(), NeatConfigEntity.class);
-        AIConfig aiConfig = new NEATConfig(neatConfigEntity);
 
-        NEATGATrainingManager neatgaTrainingManager = new NEATGATrainingManager();
+
+
 
         try {
-            neatgaTrainingManager.initialise(aiConfig);
+            NEATGATrainingManager neatgaTrainingManager = new NEATGATrainingManager(neatConfigEntity);
         } catch (InitialisationFailedException e) {
             log.error("[NeatDataListener].consumeNewNeatConfig()", e);
         }

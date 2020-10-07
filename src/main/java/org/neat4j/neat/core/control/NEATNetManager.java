@@ -35,7 +35,7 @@ public class NEATNetManager implements AIController {
 		return (this.createNetDescriptor(this.config, loadData));
 	}
 
-	public NeuralNetDescriptor createNetDescriptor(AIConfig config, boolean init) {
+	public NeuralNetDescriptor createNetDescriptor(AIConfig config, boolean init) { asdasd
 		NeuralNetDescriptor descriptor = null;
 		int inputLayerSize = (int) config.configElement("INPUT.NODES");
 		int outputLayerSize = (int) config.configElement("OUTPUT.NODES");
@@ -58,7 +58,7 @@ public class NEATNetManager implements AIController {
 	}
 
 	public void initialise(AIConfig config, boolean loadData) throws InitialisationFailedException {
-		this.config = config;
+		this.config = config; dsadasd
 		NeuralNetDescriptor descriptor = this.createNetDescriptor(loadData);
 		this.net = NeuralNetFactory.getFactory().createNN(descriptor);
 	}
