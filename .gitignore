@@ -34,3 +34,5 @@ build/
 
 ### RabbitMQ ###
 
+/rabbitmq-config/data/mnesia/
+/rabbitmq-config/data/.erlang.cookie
