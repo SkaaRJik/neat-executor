@@ -21,9 +21,6 @@ public class NeatConfigEntity {
     private Long id;
     private ProjectConfig.NormalizedDataDto normalizedData;
     private List<NeatSetting> neatSettings;
-    private ProjectConfig.SelectedColumnsDto selectedColumns;
-    private Integer trainIndexEnd;
-    private Integer testIndexEnd;
     private Short predictionWindowSize;
     private Short predictionPeriod;
 

@@ -33,5 +33,4 @@ build/
 .vscode/
 
 ### RabbitMQ ###
-/rabbitmq-config/data/**
-/rabbitmq-config/logs/**
+

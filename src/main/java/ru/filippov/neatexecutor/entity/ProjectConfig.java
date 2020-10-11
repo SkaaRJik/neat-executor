@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,51 +16,26 @@ public class ProjectConfig {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class NormalizedDataDto {
-        Double minRange;
-        Double maxRange;
-        List<List<Double>> data;
-        List<Double> mins;
-        List<Double> maxs;
+    public static class NormalizedDataDto implements Serializable {
+        
+        private Map<String, Object> normalizationServiceData;
+
+        private List<Map<String, Object>> columns;
+        
+        private Integer trainEndIndex;
+        
+        private Integer testEndIndex;
+
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class DataIndexesDto {
-
-        Integer trainEndIndex;
-
-
-        Integer testEndIndex;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class SelectedColumnsDto {
-        Integer inputs;
-        Integer outputs;
-        List<HashMap<String, String>> headers;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class PredictionParamsDto {
-        Short windowSize;
-        Short predictionPeriod;
-    }
-
+    
     private NormalizedDataDto normalizedData;
 
     private List<Map<String, Object>> settings;
 
-    private DataIndexesDto dataIndexes;
+    private Short windowSize;
 
-    private SelectedColumnsDto selectedColumns;
-
-    private PredictionParamsDto predictionParams;
+    private Short predictionPeriod;
 
 
 
