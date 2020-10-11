@@ -4,6 +4,7 @@ import org.apache.log4j.Category;
 import org.neat4j.core.AIConfig;
 import org.neat4j.core.InitialisationFailedException;
 import org.neat4j.neat.core.InnovationDatabase;
+import org.neat4j.neat.core.NEATConfig;
 import org.neat4j.neat.core.NEATGADescriptor;
 import org.neat4j.neat.core.NEATGeneticAlgorithm;
 import org.neat4j.neat.core.control.NEATNetManager;
@@ -18,6 +19,8 @@ import org.neat4j.neat.ga.core.*;
 import org.neat4j.neat.nn.core.LearningEnvironment;
 import org.neat4j.neat.nn.core.NeuralNet;
 import org.neat4j.neat.utils.MathUtils;
+import org.neat4j.neat.utils.NumberUtil;
+import ru.filippov.neatexecutor.entity.NeatConfigEntity;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -35,6 +38,39 @@ public class NEATGATrainingManager {
 	protected AIConfig config;
 	protected Random random;
 	protected InnovationDatabase innovationDatabase;
+
+	public NEATGATrainingManager() {
+
+	}
+
+	public NEATGATrainingManager(NeatConfigEntity neatConfigEntity) throws InitialisationFailedException{
+
+		try{
+			this.config = new NEATConfig(neatConfigEntity);
+		} catch (Exception e) {
+			throw new InitialisationFailedException("AIConfig can't be initialised", e);
+		}
+
+
+		MathUtils.initRandom((long) config.configElement("GENERATOR.SEED"));
+		this.random = MathUtils.getRand();
+
+		GADescriptor gaDescriptor = this.createDescriptor(config);
+		this.assigGA(this.createGeneticAlgorithm(gaDescriptor));
+		try {
+			this.assignConfig(config);
+			innovationDatabase = new InnovationDatabase(this.random, this.ga.pluginAllowedActivationFunctions(config));
+			this.ga.pluginFitnessFunction(this.createFunction(neatConfigEntity.getNormalizedData()));
+			this.ga.pluginCrossOver(new NEATCrossover());
+			this.ga.pluginMutator(new NEATMutator(this.random, innovationDatabase));
+			this.ga.pluginParentSelector(new TournamentSelector(this.random));
+			this.ga.createPopulation(innovationDatabase);
+		} catch (InvalidFitnessFunction e) {
+			throw new InitialisationFailedException(e);
+		}  catch (Exception e) {
+			throw new InitialisationFailedException(e);
+		}
+	}
 
 
 	public GeneticAlgorithm getGeneticAlgorithm() {
@@ -87,7 +123,8 @@ public class NEATGATrainingManager {
 			cat.info("Running Epoch[" + i + "]\r");
 			this.ga.runEpoch();
 			this.saveBest();
-			if ((this.ga.discoverdBestMember().fitness() >= errorValueToTerminate && !nOrder) || (this.ga.discoverdBestMember().fitness() <= errorValueToTerminate && nOrder)) {
+			if ((this.ga.discoverdBestMember().fitness() >= errorValueToTerminate && !nOrder)
+					|| (this.ga.discoverdBestMember().fitness() <= errorValueToTerminate && nOrder)) {
 				terminate = true;
 			}
 			i++;
@@ -114,40 +151,40 @@ public class NEATGATrainingManager {
 	public GADescriptor createDescriptor(AIConfig config) {
 
 		NEATGADescriptor descriptor = new NEATGADescriptor();
-		descriptor.setPAddLink((double)  config.configElement("PROBABILITY.ADDLINK"));
-		descriptor.setPAddNode((double)  config.configElement("PROBABILITY.ADDNODE"));
-		descriptor.setPToggleLink((double)  config.configElement("PROBABILITY.TOGGLELINK"));
-		descriptor.setPMutateBias((double)  config.configElement("PROBABILITY.MUTATEBIAS"));
-		descriptor.setPNewActivationFunction((double)  config.configElement("PROBABILITY.NEWACTIVATIONFUNCTION"));
-		//descriptor.setPXover((double)  config.configElement("PROBABILITY.CROSSOVER"));
-		descriptor.setPMutation((double)  config.configElement("PROBABILITY.MUTATION"));
+		descriptor.setPAddLink(NumberUtil.castToDouble(  config.configElement("PROBABILITY.ADDLINK")));
+		descriptor.setPAddNode(NumberUtil.castToDouble(  config.configElement("PROBABILITY.ADDNODE")));
+		descriptor.setPToggleLink(NumberUtil.castToDouble(  config.configElement("PROBABILITY.TOGGLELINK")));
+		descriptor.setPMutateBias(NumberUtil.castToDouble(  config.configElement("PROBABILITY.MUTATEBIAS")));
+		descriptor.setPNewActivationFunction(NumberUtil.castToDouble(  config.configElement("PROBABILITY.NEWACTIVATIONFUNCTION")));
+		//descriptor.setPXover(NumberUtil.castToDouble(  config.configElement("PROBABILITY.CROSSOVER"));
+		descriptor.setPMutation(NumberUtil.castToDouble(config.configElement("PROBABILITY.MUTATION")));
 		descriptor.setInputNodes((int)  config.configElement("INPUT.NODES"));
 		descriptor.setOutputNodes((int)  config.configElement("OUTPUT.NODES"));
 		descriptor.setNaturalOrder((boolean)  config.configElement("NATURAL.ORDER.STRATEGY"));
 		descriptor.setPopulationSize((int)  config.configElement("POP.SIZE"));
-		descriptor.setDisjointCoeff((double)  config.configElement("DISJOINT.COEFFICIENT"));
-		descriptor.setExcessCoeff((double)  config.configElement("EXCESS.COEFFICIENT"));
-		descriptor.setWeightCoeff((double)  config.configElement("WEIGHT.COEFFICIENT"));
-		descriptor.setThreshold((double)  config.configElement("COMPATABILITY.THRESHOLD"));
-		descriptor.setCompatabilityChange((double)  config.configElement("COMPATABILITY.CHANGE"));
+		descriptor.setDisjointCoeff(NumberUtil.castToDouble(config.configElement("DISJOINT.COEFFICIENT")));
+		descriptor.setExcessCoeff(NumberUtil.castToDouble(config.configElement("EXCESS.COEFFICIENT")));
+		descriptor.setWeightCoeff(NumberUtil.castToDouble(config.configElement("WEIGHT.COEFFICIENT")));
+		descriptor.setThreshold(NumberUtil.castToDouble(  config.configElement("COMPATABILITY.THRESHOLD")));
+		descriptor.setCompatabilityChange(NumberUtil.castToDouble(  config.configElement("COMPATABILITY.CHANGE")));
 		descriptor.setMaxSpecieAge((int)  config.configElement("SPECIE.FITNESS.MAX"));
 		descriptor.setSpecieAgeThreshold((int)  config.configElement("SPECIE.AGE.THRESHOLD"));
 		descriptor.setSpecieYouthThreshold((int)  config.configElement("SPECIE.YOUTH.THRESHOLD"));
-		descriptor.setAgePenalty((double)  config.configElement("SPECIE.OLD.PENALTY"));
-		descriptor.setYouthBoost((double)  config.configElement("SPECIE.YOUTH.BOOST"));
+		descriptor.setAgePenalty(NumberUtil.castToDouble(  config.configElement("SPECIE.OLD.PENALTY")));
+		descriptor.setYouthBoost(NumberUtil.castToDouble(  config.configElement("SPECIE.YOUTH.BOOST")));
 		descriptor.setSpecieCount((int)  config.configElement("SPECIE.COUNT"));
-		descriptor.setPWeightReplaced((double)  config.configElement("PROBABILITY.WEIGHT.REPLACED"));
-		descriptor.setSurvivalThreshold((double)  config.configElement("SURVIVAL.THRESHOLD"));
+		descriptor.setPWeightReplaced(NumberUtil.castToDouble(  config.configElement("PROBABILITY.WEIGHT.REPLACED")));
+		descriptor.setSurvivalThreshold(NumberUtil.castToDouble(  config.configElement("SURVIVAL.THRESHOLD")));
 		descriptor.setFeatureSelection((boolean)  config.configElement("FEATURE.SELECTION"));
 		descriptor.setExtraFeatureCount((int)  config.configElement("EXTRA.FEATURE.COUNT"));
 		descriptor.setEleEvents((boolean)  config.configElement("ELE.EVENTS"));
-		descriptor.setEleSurvivalCount((double)  config.configElement("ELE.SURVIVAL.COUNT"));
+		descriptor.setEleSurvivalCount(NumberUtil.castToDouble(  config.configElement("ELE.SURVIVAL.COUNT")));
 		descriptor.setEleEventTime((int)  config.configElement("ELE.EVENT.TIME"));
 		descriptor.setRecurrencyAllowed((boolean)  config.configElement("RECURRENCY.ALLOWED"));
 		descriptor.setKeepBestEver((boolean)  config.configElement("KEEP.BEST.EVER"));
-		descriptor.setErrorTerminationValue((double)  config.configElement("TERMINATION.VALUE"));
-		descriptor.setMaxPerturb((double)  config.configElement("MAX.PERTURB"));
-		descriptor.setMaxBiasPerturb((double)  config.configElement("MAX.BIAS.PERTURB"));
+		descriptor.setErrorTerminationValue(NumberUtil.castToDouble(  config.configElement("TERMINATION.VALUE")));
+		descriptor.setMaxPerturb(NumberUtil.castToDouble(  config.configElement("MAX.PERTURB")));
+		descriptor.setMaxBiasPerturb(NumberUtil.castToDouble(  config.configElement("MAX.BIAS.PERTURB")));
 		descriptor.setToggleErrorTerminationValue((boolean) config.configElement("TERMINATION.VALUE.TOGGLE"));
 
 		return (descriptor);
@@ -160,7 +197,7 @@ public class NEATGATrainingManager {
 	 * @return created GA
 	 */
 	public GeneticAlgorithm createGeneticAlgorithm(GADescriptor gaDescriptor) {
-		GeneticAlgorithm ga = new NEATGeneticAlgorithm((NEATGADescriptor)gaDescriptor, this.random, 5);
+		GeneticAlgorithm ga = new NEATGeneticAlgorithm((NEATGADescriptor)gaDescriptor, this.random, 1);
 		return (ga);
 	}
 
@@ -172,8 +209,8 @@ public class NEATGATrainingManager {
 		AIConfig nnConfig;
 		NEATNetManager netManager;
 		NeuralNet net = null;
-		NetworkDataSet dataSet = null;
-		NetworkDataSet testSet = null;
+		//NetworkDataSet dataSet = null;
+		//NetworkDataSet testSet = null;
 		LearningEnvironment env;
 
 		try {
@@ -192,8 +229,8 @@ public class NEATGATrainingManager {
 				netManager.initialise(config, true);
 				net = netManager.managedNet();
 				env = net.netDescriptor().learnable().learningEnvironment();
-				dataSet = (NetworkDataSet)env.learningParameter("TRAINING.SET");
-				testSet = (NetworkDataSet)env.learningParameter("TEST.SET");
+				//dataSet = (NetworkDataSet)env.learningParameter("TRAINING.SET");
+				//testSet = (NetworkDataSet)env.learningParameter("TEST.SET");
 				function = new MSENEATFitnessFunction(net, dataSet, testSet);
 
 		}  catch (IllegalArgumentException e) {
