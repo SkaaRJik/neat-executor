@@ -17,9 +17,7 @@ import java.util.Properties;
  */
 public class NEATLoader implements AIConfigurationLoader {
 
-	/**
-	 * @see org.neat4j.ailibrary.core.AIConfigurationLoader#loadConfig(java.lang.String)
-	 */
+
 	public AIConfig loadConfig(String location) {
 		AIConfig config = null;
 		try {

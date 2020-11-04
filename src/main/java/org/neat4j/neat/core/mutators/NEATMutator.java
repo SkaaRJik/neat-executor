@@ -6,14 +6,15 @@
  */
 package org.neat4j.neat.core.mutators;
 
-import org.apache.log4j.Category;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.neat4j.neat.core.*;
 import org.neat4j.neat.ga.core.Chromosome;
 import org.neat4j.neat.ga.core.Gene;
 import org.neat4j.neat.ga.core.Mutator;
 import org.neat4j.neat.nn.core.ActivationFunction;
 import org.neat4j.neat.nn.core.functions.ActivationFunctionContainer;
-import org.neat4j.neat.utils.MathUtils;
+import org.neat4j.neat.utils.RandomUtils;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -24,7 +25,7 @@ import java.util.Random;
  * Performs all Link and node mutations 
  */
 public class NEATMutator implements Mutator {
-	private static final Category cat = Category.getInstance(NEATMutator.class);
+	private static final Logger logger = LogManager.getLogger(NEATMutator.class);
 	private double pAddLink;
 	private double pAddNode;
 	private double pPerturb;
@@ -102,7 +103,7 @@ public class NEATMutator implements Mutator {
 		double perturbRandVal = random.nextDouble();
 		Gene mutated = mutatee;
 		if (perturbRandVal < this.pPerturb) {
-			mutated = new NEATFeatureGene(mutatee.getInnovationNumber(), mutatee.geneAsNumber().doubleValue() + MathUtils.nextClampedDouble(-perturb, perturb));
+			mutated = new NEATFeatureGene(mutatee.getInnovationNumber(), mutatee.geneAsNumber().doubleValue() + RandomUtils.nextClampedDouble(-perturb, perturb));
 		}
 		
 		return (mutated);
@@ -116,9 +117,9 @@ public class NEATMutator implements Mutator {
 
 		if (perturbRandVal < this.pPerturb) {
 			if (this.pWeightReplaced > random.nextDouble()) {
-				newWeight = MathUtils.nextPlusMinusOne();
+				newWeight = RandomUtils.nextPlusMinusOne();
 			} else {
-				newWeight = mutatee.getWeight() + MathUtils.nextClampedDouble(-perturb, perturb);				
+				newWeight = mutatee.getWeight() + RandomUtils.nextClampedDouble(-perturb, perturb);
 			}
 //			newWeight = mutatee.getWeight() + MathUtils.nextClampedDouble(-PERTURB, PERTURB);				
 			mutated = new NEATLinkGene(mutatee.getInnovationNumber(), 
@@ -177,12 +178,12 @@ public class NEATMutator implements Mutator {
 		}
 
 		if (perturbRandVal < this.pPerturb) {
-			newSF = mutatee.sigmoidFactor() + MathUtils.nextClampedDouble(-perturb, perturb);
+			newSF = mutatee.sigmoidFactor() + RandomUtils.nextClampedDouble(-perturb, perturb);
 			mutated = new NEATNodeGene(mutated.getInnovationNumber(), mutated.id(), newSF, mutated.getType(), mutated.getLabel(),mutated.bias(), mutated.getActivationFunction());
 		}
 		
 		if (mutateBias < this.pMutateBias) {
-			newBias += MathUtils.nextClampedDouble(-biasPerturb, biasPerturb);
+			newBias += RandomUtils.nextClampedDouble(-biasPerturb, biasPerturb);
 			mutated = new NEATNodeGene(mutated.getInnovationNumber(), mutated.id(), mutated.sigmoidFactor(), mutated.getType(), mutated.getLabel(),newBias, mutated.getActivationFunction());
 		}
 		
@@ -238,7 +239,7 @@ public class NEATMutator implements Mutator {
 				if (!this.linkIllegal(from, to, links)) {
 					// set it to a random value
 					newLink = innovationDatabase.submitLinkInnovation(from.id(), to.id());
-					((NEATLinkGene)newLink).setWeight(MathUtils.nextPlusMinusOne());
+					((NEATLinkGene)newLink).setWeight(RandomUtils.nextPlusMinusOne());
 					// add link between 2 unconnected nodes
 					genes[genes.length - 1] = newLink;
 					mutatee.updateChromosome(genes);
@@ -498,7 +499,7 @@ public class NEATMutator implements Mutator {
 		pAddNode = addNode;
 	}
 	/**
-	 * @param disable The pDisable to set.
+	 * @param toggle The pDisable to set.
 	 */
 	public void setPToggle(double toggle) {
 		pToggle = toggle;

@@ -6,7 +6,8 @@
  */
 package org.neat4j.neat.core.control;
 
-import org.apache.log4j.Category;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.neat4j.core.AIConfig;
 import org.neat4j.core.AIController;
 import org.neat4j.core.InitialisationFailedException;
@@ -23,7 +24,7 @@ import org.neat4j.neat.nn.core.learning.GALearnable;
  * Mamages the initialisation and creation of a NEAT network
  */
 public class NEATNetManager implements AIController {
-	private static final Category cat = Category.getInstance(NEATNetManager.class);
+	private static final Logger logger = LogManager.getLogger(NEATNetManager.class);
 	private NeuralNet net;
 	private AIConfig config;
 
@@ -35,10 +36,10 @@ public class NEATNetManager implements AIController {
 		return (this.createNetDescriptor(this.config, loadData));
 	}
 
-	public NeuralNetDescriptor createNetDescriptor(AIConfig config, boolean init) { asdasd
+	public NeuralNetDescriptor createNetDescriptor(AIConfig config, boolean init) {
 		NeuralNetDescriptor descriptor = null;
-		int inputLayerSize = (int) config.configElement("INPUT.NODES");
-		int outputLayerSize = (int) config.configElement("OUTPUT.NODES");
+		int inputLayerSize = Integer.parseInt((String) config.getConfigElementByName("INPUT.NODES"));
+		int outputLayerSize = Integer.parseInt((String) config.getConfigElementByName("OUTPUT.NODES"));
 		// create learnable
 
 			Learnable learnable = this.createLearnable(config, outputLayerSize, init);
@@ -58,7 +59,7 @@ public class NEATNetManager implements AIController {
 	}
 
 	public void initialise(AIConfig config, boolean loadData) throws InitialisationFailedException {
-		this.config = config; dsadasd
+		this.config = config;
 		NeuralNetDescriptor descriptor = this.createNetDescriptor(loadData);
 		this.net = NeuralNetFactory.getFactory().createNN(descriptor);
 	}
@@ -70,7 +71,7 @@ public class NEATNetManager implements AIController {
 
 	public NetworkDataSet dataSet(String keyName, AIConfig config, int opSize) {
 		NetworkDataSet dSet = null;
-		String fileName = (String) config.configElement(keyName);
+		String fileName = (String) config.getConfigElementByName(keyName);
 		if (fileName != null) {
 			dSet = new CSVDataLoader(fileName, opSize).loadData();
 		}
@@ -95,7 +96,7 @@ public class NEATNetManager implements AIController {
 		le.addEnvironmentParameter("TEST.SET", dSet);
 
 		Learnable learnable = new GALearnable(le);
-		cat.debug("learnableClassName:" + learnable.getClass().getName());
+		logger.debug("learnableClassName:" + learnable.getClass().getName());
 
 
 		return (learnable);

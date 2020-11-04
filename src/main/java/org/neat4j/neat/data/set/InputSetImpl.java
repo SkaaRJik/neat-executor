@@ -26,28 +26,24 @@ public class InputSetImpl implements NetworkInputSet {
 		this.inputs = inputs;
 		this.idx = 0;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkInputSet#size()
-	 */
+
 	public int size() {
 		return (this.inputs.size());
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkInputSet#nextInput()
-	 */
+
 	public NetworkInput nextInput() {
 		this.idx = this.idx % this.size();
 		return ((NetworkInput)this.inputs.get(idx++));		
 	}
 	/* (non-Javadoc)
-	 * @see org.neat4j.ailibrary.nn.core.NetworkInputSet#inputAt(int)
+	 *
 	 */
 	public NetworkInput inputAt(int idx) {
 		return ((NetworkInput)this.inputs.get(idx));		
 	}
 	/* (non-Javadoc)
-	 * @see org.neat4j.ailibrary.nn.data.NetworkInputSet#removeInputAt(int)
+	 *
 	 */
 	public void removeInputAt(int idx) {
 		if (idx < this.size()) {

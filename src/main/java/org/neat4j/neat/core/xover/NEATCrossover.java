@@ -6,7 +6,8 @@
  */
 package org.neat4j.neat.core.xover;
 
-import org.apache.log4j.Category;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.neat4j.neat.core.NEATChromosome;
 import org.neat4j.neat.core.NEATGene;
 import org.neat4j.neat.ga.core.Chromosome;
@@ -24,7 +25,7 @@ import java.util.Random;
  */
 public class NEATCrossover implements CrossOver {
 	private static final long serialVersionUID = 1L;
-	private static final Category cat = Category.getInstance(NEATCrossover.class);
+	private static final Logger logger = LogManager.getLogger(NEATCrossover.class);
 	private double pXOver;
 	
 	public void setProbability(double prob) {

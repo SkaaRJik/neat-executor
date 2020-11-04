@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class ExpectedOutputImpl implements NetworkOutput {
 	private List<Double> values;
-
+	
 	public ExpectedOutputImpl(List<Double> eOut) {
 		this.values = new ArrayList<>(eOut);
 
@@ -29,9 +29,7 @@ public class ExpectedOutputImpl implements NetworkOutput {
 
 		//System.arraycopy(eOut, 0, this.values, 0, this.values.length);
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutput#values()
-	 */
+
 	public List<Double> getNetOutputs() {
 		return (this.values);
 	}
@@ -43,7 +41,7 @@ public class ExpectedOutputImpl implements NetworkOutput {
 			sBuff.append(this.values.get(i));
 			sBuff.append(",");
 		}
-
+		
 		return (sBuff.toString());
 	}
 }

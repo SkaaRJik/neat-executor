@@ -5,15 +5,15 @@ import java.io.Serializable;
 /**
  * @author MSimmerson
  *
- *
+ * 
  * Used to describe a link between two getNeurons
  */
-public class Synapse implements Serializable {
+public class Synapse implements Serializable{
 	private Neuron from;
 	private Neuron to;
 	private double weight;
 	private boolean enabled;
-
+	
 	/**
 	 * @return Returns the weight.
 	 */
@@ -38,8 +38,8 @@ public class Synapse implements Serializable {
 	public Neuron getTo() {
 		return to;
 	}
-
-	public Synapse(Neuron from, Neuron to, double weight) {
+	
+	public Synapse(Neuron from, Neuron to, double weight) { 
 		this.from = from;
 		this.to = to;
 		this.weight = weight;

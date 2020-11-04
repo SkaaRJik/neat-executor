@@ -21,9 +21,7 @@ public class NEATNetOutput implements NetworkOutput {
 		this.netOutputs = new ArrayList<>(outputs);
 		//System.arraycopy(outputs, 0, this.netOutputs, 0, this.netOutputs.length);
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutput#values()
-	 */
+
 	public List<Double> getNetOutputs() {
 		return (this.netOutputs);
 	}

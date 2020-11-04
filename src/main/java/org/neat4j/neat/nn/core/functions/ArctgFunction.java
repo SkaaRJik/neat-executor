@@ -21,7 +21,7 @@ public class ArctgFunction extends ActivationFunctionImpl {
     @Override
     public double derivative(double neuronIp) {
 
-        return this.factor / (Math.pow(this.factor, 2)* Math.pow(neuronIp,2)+1);
+        return this.factor / (Math.pow(this.factor, 2)*Math.pow(neuronIp,2)+1);
     }
 
     @Override

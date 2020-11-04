@@ -24,16 +24,12 @@ public class NEATNetOutputSet implements NetworkOutputSet {
 		this.outputSet = new ArrayList<>();
 		this.idx = 0;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#size()
-	 */
+
 	public int size() {
 		return (this.outputSet.size());
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#nextOutput()
-	 */
+
 	public NetworkOutput nextOutput() {
 		this.idx = this.idx % this.size();
 		return ((NetworkOutput)this.outputSet.get(this.idx++));		
@@ -49,15 +45,11 @@ public class NEATNetOutputSet implements NetworkOutputSet {
 		this.idx = 0;
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#addNetworkOutput(org.neat4j.ailibrary.nn.core.NetworkOutput)
-	 */
+
 	public void addNetworkOutput(NetworkOutput op) {
 		this.outputSet.add(op);
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#removeNetworkOutput(int)
-	 */
+
 	public void removeNetworkOutput(int idx) {
 		if (idx < this.size()) {
 			this.outputSet.remove(idx);

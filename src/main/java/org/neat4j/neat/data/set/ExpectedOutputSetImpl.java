@@ -26,16 +26,14 @@ public class ExpectedOutputSetImpl implements ExpectedOutputSet {
 		this.ops = eOps;
 		this.headers = headers;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#size()
-	 */
+
 	public int size() {
 		return (this.ops.size());
 	}
 
 	/**
 	 * Wraps round to beginning
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#nextOutput()
+	 *
 	 */
 	public NetworkOutput nextOutput() {
 		this.idx = this.idx % this.size();
@@ -47,14 +45,12 @@ public class ExpectedOutputSetImpl implements ExpectedOutputSet {
 		this.idx = 0;
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#addNetworkOutput(org.neat4j.ailibrary.nn.core.NetworkOutput)
-	 */
+
 	public void addNetworkOutput(NetworkOutput op) {
 		this.ops.add(op);
 	}
 	/* (non-Javadoc)
-	 * @see org.neat4j.ailibrary.nn.core.ExpectedOutputSet#outputAt(int)
+	 *
 	 */
 	public NetworkOutput outputAt(int idx) {
 		return ((NetworkOutput)this.ops.get(idx));		
@@ -71,7 +67,7 @@ public class ExpectedOutputSetImpl implements ExpectedOutputSet {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#removeNetworkOutput(int)
+	 *
 	 */
 	public void removeNetworkOutput(int idx) {
 		if (idx < this.size()) {

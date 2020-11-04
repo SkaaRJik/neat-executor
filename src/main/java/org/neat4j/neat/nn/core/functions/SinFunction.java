@@ -26,7 +26,7 @@ public class SinFunction extends ActivationFunctionImpl {
     public static String getStaticFunctionName(){
         return "sin(x)";
     }
-    public String getFunctionName(){
+    public  String getFunctionName(){
         return "sin(x)";
     }
 }

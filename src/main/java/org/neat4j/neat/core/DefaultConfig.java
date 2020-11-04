@@ -6,10 +6,10 @@ public class DefaultConfig {
     static private AIConfig defaultConfig;
 
     public static  AIConfig getDefaultConfig(){
-
-
-
-
+        
+        
+        
+        
         if(defaultConfig == null){
             defaultConfig = new NEATConfig();
             defaultConfig.updateConfig("PROBABILITY.MUTATION", "0.25");

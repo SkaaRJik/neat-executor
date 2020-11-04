@@ -6,7 +6,8 @@
  */
 package org.neat4j.neat.core;
 
-import org.apache.log4j.Category;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.neat4j.neat.ga.core.*;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.Random;
  * A species container for NEAT individuals
  */
 public class NEATSpecie extends Specie {
-	private static final Category cat = Category.getInstance(NEATSpecie.class);
+	private static final Logger logger = LogManager.getLogger(NEATSpecie.class);
 	private double excessCoeff;
 	private double disjointCoeff;
 	private double weightCoeff;
@@ -30,7 +31,7 @@ public class NEATSpecie extends Specie {
 	private int youthThreshold;
 	private double fitnessMultiplier = 1;
 
-
+	
 	public NEATSpecie(double threshold, double excessCoeff, double disjointCoeff, double weightCoeff, int id, Random random) {
 		super(threshold, id, random);
 		this.disjointCoeff = disjointCoeff;
@@ -44,7 +45,7 @@ public class NEATSpecie extends Specie {
 			((NEATChromosome)specieMember).setSpecieId(this.id());
 			addedOk = true;
 		}
-
+		
 		return (addedOk);
 	}
 	/**
@@ -71,41 +72,41 @@ public class NEATSpecie extends Specie {
 	public void setYouthBoost(double youthBoost) {
 		this.youthBoost = youthBoost;
 	}
-
+	
 	protected void adjustFitness() {
 		ArrayList members = this.specieMembers();
 		int i;
 		Chromosome member;
 		this.fitnessMultiplier = 1;
-
+		
 		if (this.ageThreshold < this.specieAge) {
 			this.fitnessMultiplier = this.agePenalty;
 		} else if (this.youthThreshold > this.specieAge) {
 			this.fitnessMultiplier = this.youthBoost;
 		}
-
+		
 		for (i = 0; i < members.size(); i++) {
 			member = (Chromosome)members.get(i);
 			member.updateFitness((member.fitness() * this.fitnessMultiplier));
 		}
 	}
-
+	
 	protected double fitnessMultiplier() {
 		return (this.fitnessMultiplier);
 	}
-
+	
 	protected boolean isCompatable(Chromosome specieApplicant, Chromosome specieRepresentative) {
 		boolean compatable;
 		double compatabilityScore;
-
+		
 		if (specieRepresentative == null) {
 			compatable = true;
 		} else {
 			compatabilityScore = NEATSpecieManager.specieManager().compatibilityScore(specieApplicant, specieRepresentative, this.excessCoeff, this.disjointCoeff, this.weightCoeff);
-			//cat.debug("compatabilityScore:" + compatabilityScore);
+			//logger.debug("compatabilityScore:" + compatabilityScore);
 			compatable = compatabilityScore < this.specieThreshold();
 		}
-
+		
 		return (compatable);
 	}
 
@@ -115,27 +116,27 @@ public class NEATSpecie extends Specie {
 		ChromosomeSet child;
 		Chromosome[] offspring = new Chromosome[count];
 		Chromosome[] matableMembers;
-
+		
 		// first order the members
-		ArrayList unsorted = this.specieMembers();
+		ArrayList unsorted = this.specieMembers();		
 		Object[] sorted = unsorted.toArray();
 		Arrays.sort(sorted);
 
 		// take the top n%
-		int matableCount = (int) Math.ceil(sorted.length * this.getSurvivalThreshold());
+		int matableCount = (int)Math.ceil(sorted.length * this.getSurvivalThreshold());
 		matableMembers = new NEATChromosome[matableCount];
-
+		
 		for (i = 0; i < matableCount; i++) {
 			matableMembers[i] = (NEATChromosome)sorted[i];
 		}
-
+		
 		if (count > 0) {
 			// copy best member.
 			offspring[0] = this.cloneChromosome((NEATChromosome)sorted[0]);
 		}
-
+		
 		try {
-			for (i = 1; i < offspring.length; i++) {
+			for (i = 1; i < offspring.length; i++) { 
 				parents = selector.selectParents(matableMembers, false);
 				child = xOver.crossOver(this.cloneParents(parents), super.random);
 				offspring[i] = mut.mutate(child.nextChromosome());
@@ -143,13 +144,13 @@ public class NEATSpecie extends Specie {
 			}
 			this.specieAge++;
 		} catch (Exception e) {
-			cat.error("produceOffspring produced error:count:" + count + ":current iteration:" + i + ":specie size:" + this.specieMembers().size());
+			logger.error("produceOffspring produced error:count:" + count + ":current iteration:" + i + ":specie size:" + this.specieMembers().size());
 			e.printStackTrace();
 		}
-
+		
 		return (offspring);
 	}
-
+	
 	public int specieAge() {
 		return (this.specieAge);
 	}
@@ -159,20 +160,20 @@ public class NEATSpecie extends Specie {
 	public void setYouthThreshold(int youthThreshold) {
 		this.youthThreshold = youthThreshold;
 	}
-
+	
 	private ChromosomeSet cloneParents(ChromosomeSet clonee) {
 		ChromosomeSet clonedSet = new ChromosomeSet();
-
+		
 		Chromosome cloneeChromo = clonee.nextChromosome();
 		Chromosome clone = this.cloneChromosome(cloneeChromo);
 		clone.updateFitness(cloneeChromo.fitness());
 		clonedSet.add(clone);
-
+		
 		cloneeChromo = clonee.nextChromosome();
 		clone = this.cloneChromosome(cloneeChromo);
 		clone.updateFitness(cloneeChromo.fitness());
 		clonedSet.add(clone);
-
+		
 		return (clonedSet);
 	}
 
@@ -187,7 +188,7 @@ public class NEATSpecie extends Specie {
 				compare = -1;
 			}
 		}
-
+		
 		return (compare);
-	}
+	}	
 }

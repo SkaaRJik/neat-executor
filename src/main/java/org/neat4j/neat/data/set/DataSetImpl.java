@@ -25,16 +25,12 @@ public class DataSetImpl implements NetworkDataSet {
 		this.inputSet = inputSet;
 		this.expectedOutputSet = expectedOutputSet;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkDataSet#inputSet()
-	 */
+
 	public NetworkInputSet inputSet() {
 		return (this.inputSet);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkDataSet#expectedOutputSet()
-	 */
+
 	public ExpectedOutputSet expectedOutputSet() {
 		return (this.expectedOutputSet);
 	}

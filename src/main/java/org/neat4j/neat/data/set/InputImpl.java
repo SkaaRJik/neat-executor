@@ -54,9 +54,7 @@ public class InputImpl implements NetworkInput {
 	}
 
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkInput#pattern()
-	 */
+
 	public double[] pattern() {
 		return (this.inputPattern);
 	}

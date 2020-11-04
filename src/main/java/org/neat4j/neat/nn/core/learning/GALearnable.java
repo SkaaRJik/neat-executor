@@ -15,17 +15,13 @@ public class GALearnable implements Learnable {
 	public GALearnable(LearningEnvironment env) {
 		this.env = env;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.Learnable#teach(org.neat4j.ailibrary.nn.core.NeuralNet)
-	 */
+
 	public void teach(NeuralNet net) {
 		// does nothing
 		throw new UnsupportedOperationException("teach operation not supported in NEAT");
 	}
 	
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.Learnable#learningEnvironment()
-	 */
+
 	public LearningEnvironment learningEnvironment() {
 		return (this.env);
 	}

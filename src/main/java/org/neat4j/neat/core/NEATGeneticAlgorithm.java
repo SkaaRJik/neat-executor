@@ -6,12 +6,14 @@
  */
 package org.neat4j.neat.core;
 
-import org.apache.log4j.Category;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.neat4j.core.AIConfig;
 import org.neat4j.neat.core.mutators.NEATMutator;
 import org.neat4j.neat.ga.core.*;
 import org.neat4j.neat.nn.core.functions.ActivationFunctionContainer;
 import org.neat4j.neat.nn.core.functions.ActivationFunctionImpl;
+import org.springframework.util.StringUtils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,7 +29,7 @@ import java.util.Random;
  */
 public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	private static final long serialVersionUID = 1L;
-	private static final Category cat = Category.getInstance(NEATGeneticAlgorithm.class);
+	private static final Logger logger = LogManager.getLogger(NEATGeneticAlgorithm.class);
 	private NEATGADescriptor descriptor;
 	private NEATMutator mut;
 	private FitnessFunction func;
@@ -52,7 +54,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		this.descriptor = descriptor;
 		this.specieList = new Species();
 		this.random = random;
-		this.numberOfThreads = numberOfThreads-1;
+		this.numberOfThreads = numberOfThreads;
 		this.threads = new Thread[numberOfThreads];
 		this.offsetOfIndex = descriptor.gaPopulationSize() / numberOfThreads;
 		specieIdIdx = 1;
@@ -65,7 +67,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		Chromosome[] currentGen = this.pop.genoTypes();
 
 		this.setChromosomeNO(currentGen);
-		cat.debug("Evaluating pop");
+		logger.debug("Evaluating pop");
 		for (int i = 0; i < this.numberOfThreads; i++) {
 			//part = getPartChromosomes(currentGen, i);
 			//Chromosome[] finalPart = part;
@@ -172,7 +174,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		
 		this.specieList.resetSpecies(this.descriptor.getThreshold());
 		
-		cat.info("Compat threshold:" + this.descriptor.getThreshold());
+		logger.info("Compat threshold:" + this.descriptor.getThreshold());
 		for (i = 0; i < currentGen.length; i++) {
 			if (!memberAssigned) {
 				currentSpecieList = this.specieList.specieList();
@@ -182,7 +184,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 					if (specie.addSpecieMember(currentGen[i])) {
 						memberAssigned = true;
 						//((NEATChromosome)currentGen[i]).setSpecieId(specie.id());
-						//cat.info("Member assigned to specie " + specie.id());
+						//logger.info("Member assigned to specie " + specie.id());
 					} else {
 						j++;
 					}
@@ -192,17 +194,17 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 					specie = this.createNewSpecie(currentGen[i]);
 					this.specieList.addSpecie(specie);
 					//((NEATChromosome)currentGen[i]).setSpecieId(specie.id());
-					cat.info("Created new specie, member assigned to specie " + specie.id());
+					logger.info("Created new specie, member assigned to specie " + specie.id());
 				}
 			}
 			memberAssigned = false;
 		}
 
-		if (cat.isDebugEnabled()) {
+		if (logger.isDebugEnabled()) {
 			for (i = 0; i < this.specieList.specieList().size(); i++) {
 				specie = (Specie)this.specieList.specieList().get(i);
 				if (!specie.isExtinct() && specie.specieMembers().size() > 0) {
-					cat.debug("Specie:" + specie.id() + ":size:" + specie.specieMembers().size() + ":age:" + ((NEATSpecie)specie).specieAge() + ":fAge:" + + specie.getCurrentFitnessAge() + ":best:" + specie.findBestMember().fitness());
+					logger.debug("Specie:" + specie.id() + ":size:" + specie.specieMembers().size() + ":age:" + ((NEATSpecie)specie).specieAge() + ":fAge:" + + specie.getCurrentFitnessAge() + ":best:" + specie.findBestMember().fitness());
 				}
 			}
 		}
@@ -227,8 +229,8 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 			// copy best
 			this.discoveredBest = this.cloneBest(this.genBest);
 		}
-		cat.info("Best Ever Raw:" + (this.discoveredBest.fitness()) + ":from specie:" + ((NEATChromosome)this.discoveredBest).getSpecieId());		
-		cat.debug("Best of Generation is:" + (this.genBest.fitness()) + " specie " + ((NEATChromosome)this.genBest).getSpecieId());
+		logger.info("Best Ever Raw:" + (this.discoveredBest.fitness()) + ":from specie:" + ((NEATChromosome)this.discoveredBest).getSpecieId());
+		logger.debug("Best of Generation is:" + (this.genBest.fitness()) + " specie " + ((NEATChromosome)this.genBest).getSpecieId());
 		// kill any extinct species
 		if (this.descriptor.keepBestEver()) {
 			champ = (NEATChromosome)this.discoveredBest;
@@ -236,12 +238,12 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 			champ = (NEATChromosome)this.genBest;
 		}
 		this.specieList.removeExtinctSpecies(champ);
-		cat.debug("Creating New Gen");
+		logger.debug("Creating New Gen");
 		// spawn new pop	
 		this.pop.updatePopulation(this.spawn());
 		// Display specie stats
 		validSpecieList = this.specieList.validSpecieList(champ.getSpecieId());
-		cat.debug("Num species:" + validSpecieList.size());
+		logger.debug("Num species:" + validSpecieList.size());
 		if (this.descriptor.getCompatabilityChange() > 0) {
 			if (validSpecieList.size() > this.descriptor.getSpecieCount()) {
 				this.descriptor.setThreshold(this.descriptor.getThreshold() + this.descriptor.getCompatabilityChange());
@@ -255,7 +257,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	private void runEle(Chromosome[] currentGen) {
 		if (this.descriptor.isEleEvents()) {
 			if ((this.eleCount % this.descriptor.getEleEventTime()) == 0 && this.eleCount != 0) {
-				cat.info("Runnig ELE");
+				logger.info("Runnig ELE");
 				this.descriptor.setThreshold(this.descriptor.getThreshold() * 5);
 			} else if ((this.eleCount % this.descriptor.getEleEventTime()) == 1 && this.eleCount != 1) {
 				this.descriptor.setThreshold(this.descriptor.getThreshold() / 5.0);
@@ -291,7 +293,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		for (i = 0; i < species.size(); i++) {
 			specie = (Specie)species.get(i);
 			if (specie.specieMembers().size() == 0) {
-				cat.error("spawn produced error:");
+				logger.error("spawn produced error:");
 			}
 			// ensure we have enough for next gen
 			if (i == (species.size() - 1)) {
@@ -301,7 +303,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 				offSpringCount = this.specieList.calcSpecieOffspringCount(specie, this.descriptor.gaPopulationSize(), totalAvFitness);
 			}
 			
-			//cat.debug("Sp[" + specie.id() + "] Age:" + ((NEATSpecie)specie).specieAge() + ":Offspring Sz:" + offSpringCount + ":AvF:" + specie.getAverageFitness() + ":FAge:" + specie.getCurrentFitnessAge() + ":BestF:" + specie.findBestMember().fitness());
+			//logger.debug("Sp[" + specie.id() + "] Age:" + ((NEATSpecie)specie).specieAge() + ":Offspring Sz:" + offSpringCount + ":AvF:" + specie.getAverageFitness() + ":FAge:" + specie.getCurrentFitnessAge() + ":BestF:" + specie.findBestMember().fitness());
 			if (offSpringCount > 0) {
 				offspring = specie.specieOffspring(offSpringCount, this.mut, this.selector, this.xOver);
 				for (j = 0; j < offspring.size(); j++) {
@@ -311,7 +313,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 					}
 				}
 			} else {
-				cat.debug("Specie " + specie.id() + ":size:" + specie.specieMembers().size() + " produced no offspring.  Average fitness was " + specie.averageFitness() + " out of a total fitness of " + this.specieList.totalAvSpeciesFitness());
+				logger.debug("Specie " + specie.id() + ":size:" + specie.specieMembers().size() + " produced no offspring.  Average fitness was " + specie.averageFitness() + " out of a total fitness of " + this.specieList.totalAvSpeciesFitness());
 				specie.setExtinct();
 			}
 		}
@@ -341,9 +343,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		return (this.discoveredBest);
 	}
 
-	/** 
-	 * @see org.neat4j.ailibrary.ga.core.GeneticAlgorithm#pluginMutator(org.neat4j.ailibrary.ga.core.Mutator)
-	 */
+
 	public void pluginMutator(Mutator mut) {
 		this.mut = (NEATMutator)mut;
 		this.mut.setPAddLink(this.descriptor.getPAddLink());
@@ -359,24 +359,18 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		this.mut.setpNewActivationFunction(this.descriptor.pNewActivationFunction);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.ga.core.GeneticAlgorithm#pluginFitnessFunction(org.neat4j.ailibrary.ga.core.Function)
-	 */
+
 	public void pluginFitnessFunction(FitnessFunction func) {
 		this.func = func;
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.ga.core.GeneticAlgorithm#pluginParentSelector(org.neat4j.ailibrary.ga.core.ParentSelector)
-	 */
+
 	public void pluginParentSelector(ParentSelector selector) {
 		this.selector = selector;
 		this.selector.setOrderStrategy(this.descriptor.isNaturalOrder());
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.ga.core.GeneticAlgorithm#pluginCrossOver(org.neat4j.ailibrary.ga.core.CrossOver)
-	 */
+
 	public void pluginCrossOver(CrossOver xOver) {
 		this.xOver = xOver;
 		this.xOver.setProbability(this.descriptor.getPXover());
@@ -390,7 +384,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		ObjectOutputStream s = null;
 		try {
 			if (fileName != null) {
-				cat.debug("Saving Population " + fileName);
+				logger.debug("Saving Population " + fileName);
 				out = new FileOutputStream(fileName);
 				s = new ObjectOutputStream(out);
 				s.writeObject(this.pop);
@@ -409,7 +403,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 			}
 		}
 		
-		cat.debug("Saving Population...Done");
+		logger.debug("Saving Population...Done");
 	}
 
 	public Population population() {
@@ -419,43 +413,52 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	@Override
 	public ActivationFunctionContainer pluginAllowedActivationFunctions(AIConfig config) {
 		ActivationFunctionContainer activationFunctionContainer = new ActivationFunctionContainer();
+		List<String> inputFunctions = (List<String>) config.getConfigElementByName("INPUT.ACTIVATIONFUNCTIONS");
+		List<String> hiddenFunctions =(List<String>) config.getConfigElementByName("HIDDEN.ACTIVATIONFUNCTIONS");
+		List<String> outputFunctions =(List<String>) config.getConfigElementByName("OUTPUT.ACTIVATIONFUNCTIONS");
+
+
 		try {
 
-			List<String> functions = ((NEATConfig)config).getActivationFunctionsByElementKey("INPUT.ACTIVATIONFUNCTIONS");
-			activationFunctionContainer.setInputActivationFunctions(new ArrayList<>(functions.size()));
-			for(String function : functions){
-				if("".equals(function)) {
-					continue;
+
+			activationFunctionContainer.setInputActivationFunctions(new ArrayList<>(inputFunctions.size()));
+			for(String function : inputFunctions){
+				if(!StringUtils.isEmpty(function)){
+					activationFunctionContainer.getInputActivationFunctions().add((ActivationFunctionImpl)(Class.forName(function).newInstance()));
 				}
-				activationFunctionContainer.getInputActivationFunctions().add((ActivationFunctionImpl)(Class.forName(function).newInstance()));
+
 			}
-			functions = ((NEATConfig)config).getActivationFunctionsByElementKey("HIDDEN.ACTIVATIONFUNCTIONS");
-			activationFunctionContainer.setHiddenActivationFunctions(new ArrayList<>(functions.size()));
-			for(String function : functions){
-				if("".equals(function)) {
-					continue;
+
+			activationFunctionContainer.setHiddenActivationFunctions(new ArrayList<>(hiddenFunctions.size()));
+			for(String function : hiddenFunctions){
+				if(!StringUtils.isEmpty(function)) {
+					activationFunctionContainer.getHiddenActivationFunctions().add((ActivationFunctionImpl) (Class.forName(function).newInstance()));
 				}
-				activationFunctionContainer.getHiddenActivationFunctions().add((ActivationFunctionImpl)(Class.forName(function).newInstance()));
 			}
-			functions = ((NEATConfig)config).getActivationFunctionsByElementKey("OUTPUT.ACTIVATIONFUNCTIONS");
-			activationFunctionContainer.setOutputActivationFunctions(new ArrayList<>(functions.size()));
-			for(String function : functions){
-				if("".equals(function)) {
-					continue;
+			activationFunctionContainer.setOutputActivationFunctions(new ArrayList<>(outputFunctions.size()));
+			for(String function : outputFunctions){
+				if(!StringUtils.isEmpty(function)) {
+					activationFunctionContainer.getOutputActivationFunctions().add((ActivationFunctionImpl) (Class.forName(function).newInstance()));
 				}
-				activationFunctionContainer.getOutputActivationFunctions().add((ActivationFunctionImpl)(Class.forName(function).newInstance()));
 			}
 		} catch (InstantiationException e) {
-			e.printStackTrace();
-			return null;
+			logFunctionError(inputFunctions, hiddenFunctions, outputFunctions, e);
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-			return null;
+			logFunctionError(inputFunctions, hiddenFunctions, outputFunctions, e);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
+			logFunctionError(inputFunctions, hiddenFunctions, outputFunctions, e);
 		}
 		return activationFunctionContainer;
+	}
+
+	private void logFunctionError(List<String> inputFunctions, List<String> hiddenFunctions, List<String> outputFunctions, Exception e) {
+		logger.error(
+				String.format("[NEATGeneticAlgorithm].pluginAllowedActivationFunctions \ninputs: [%s] \nhidden: [%s] \noutputs: [%s]",
+						String.join(",", inputFunctions),
+						String.join(",", hiddenFunctions),
+						String.join(",", outputFunctions)),
+				e
+		);
 	}
 
 

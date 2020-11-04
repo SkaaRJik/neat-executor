@@ -11,16 +11,16 @@ import org.neat4j.neat.nn.core.ActivationFunction;
  * @fixed Filippov
  */
 public class SigmoidFunction extends ActivationFunctionImpl {
-
+	
 	public SigmoidFunction() { this.factor = 1; }
-
+	
 	public SigmoidFunction(double factor) {
 		this.factor = factor;
 	}
-
+	
 	/**
 	 * Returns +/- 1
-	 * @see org.neat4j.ailibrary.nn.core.ActivationFunction#activate(double)
+	 *
 	 */
 	public double activate(double neuronIp) {
 		return (1.0 / ( 1.0 + Math.exp(-this.factor * neuronIp)));
@@ -30,7 +30,7 @@ public class SigmoidFunction extends ActivationFunctionImpl {
 		if(this.factor == 1)
 			return (activate(neuronIp) * (1 - activate(neuronIp)));
 		else
-			return (this.factor * Math.exp(-this.factor * neuronIp))/ Math.pow(1.0 + Math.exp(-this.factor * neuronIp),2);
+			return (this.factor * Math.exp(-this.factor * neuronIp))/Math.pow(1.0 + Math.exp(-this.factor * neuronIp),2);
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class SigmoidFunction extends ActivationFunctionImpl {
 		return "sigmoid(x)";
 	}
 
-	public String getFunctionName(){
+	public  String getFunctionName(){
 		return "sigmoid(x)";
 	}
 }

@@ -20,9 +20,7 @@ public class TournamentSelector implements ParentSelector {
 		this.rand = rand;
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.ga.core.ParentSelector#setElitismStrategy(int)
-	 */
+
 	public void setElitismStrategy(int numElitst) {
 		this.numElitist = numElitst;
 	}
@@ -58,9 +56,7 @@ public class TournamentSelector implements ParentSelector {
 		return (set);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.ga.core.ParentSelector#selectParents(org.neat4j.ailibrary.ga.core.Population)
-	 */
+
 	public ChromosomeSet selectParents(Population currentPop, boolean useElitismStrategy) {
 		Chromosome[] genoTypes = currentPop.genoTypes();
 		
@@ -86,9 +82,7 @@ public class TournamentSelector implements ParentSelector {
 		return (winner);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.ga.core.ParentSelector#setOrderStrategy(boolean)
-	 */
+
 	// TODO
 	public void setOrderStrategy(boolean naturalOrder) {
 		this.naturalOrder = naturalOrder;

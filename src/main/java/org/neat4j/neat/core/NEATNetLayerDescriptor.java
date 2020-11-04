@@ -31,42 +31,32 @@ public class NEATNetLayerDescriptor implements NeuralNetLayerDescriptor {
 		this.isOutputLayer = opLayer;
 		this.nodesSelfRecurrent = selfRecurrent;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#layerSize()
-	 */
+
 	public int layerSize() {
 		return this.layerSize;
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#layerId()
-	 */
+
 	public int layerId() {
 		return (this.layerId);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#activationFunction()
-	 */
+
 	public ActivationFunction activationFunction() {
 		return (this.function);
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#inputsIntoLayer()
-	 */
+
 	public int inputsIntoLayer() {
 		return (this.layerInputSize);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#isOutputLayer()
-	 */
+
 	public boolean isOutputLayer() {
 		return (this.isOutputLayer);
 	}
 
 	/* (non-Javadoc)
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#nodesSelfRecurrent()
+	 *
 	 */
 	public boolean nodesSelfRecurrent() {
 		return (this.nodesSelfRecurrent);

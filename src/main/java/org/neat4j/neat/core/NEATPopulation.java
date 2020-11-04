@@ -11,7 +11,7 @@ import org.neat4j.neat.ga.core.Gene;
 import org.neat4j.neat.ga.core.Population;
 import org.neat4j.neat.nn.core.ActivationFunction;
 import org.neat4j.neat.nn.core.functions.ActivationFunctionContainer;
-import org.neat4j.neat.utils.MathUtils;
+import org.neat4j.neat.utils.RandomUtils;
 
 import java.util.Random;
 
@@ -45,7 +45,7 @@ public class NEATPopulation implements Population {
 	public NEATPopulation(int popSize, int initialChromoSize, int inputs, int outputs, boolean featureSelection, Random random) {
 		this(popSize, initialChromoSize, inputs, outputs, featureSelection, 0, random);
 	}
-
+	
 	public Chromosome[] genoTypes() {
 		return (this.chromosomes);
 	}
@@ -58,16 +58,16 @@ public class NEATPopulation implements Population {
 		int i;
 		// use the innovation database to create the initial population
 		Chromosome[] templates = innovationDatabase.initialiseInnovations(this.popSize, this.inputs, this.outputs, this.featureSelection, this.extraFeatureCount);
-
+		
 		for (i = 0; i < this.popSize; i++) {
 			this.chromosomes[i] = this.individualFromTemplate(templates[i], innovationDatabase.getActivationFunctionContainer());
 		}
 	}
-
+	
 	private Chromosome individualFromTemplate(Chromosome template, ActivationFunctionContainer activationFunctionContainer) {
 		int i;
 		Gene[] templateGenes = template.genes();
-		Gene[] individualGenes = new Gene[templateGenes.length];
+		Gene[] individualGenes = new Gene[templateGenes.length]; 
 		NEATNodeGene nodeGene;
 		NEATLinkGene linkGene;
 		NEATFeatureGene featureGene;
@@ -83,22 +83,19 @@ public class NEATPopulation implements Population {
 
 
 
-				individualGenes[i] = new NEATNodeGene(nodeGene.getInnovationNumber(), nodeGene.id(), MathUtils.nextPlusMinusOne(), nodeGene.getType(), nodeGene.getLabel(), MathUtils.nextDouble(), activationFunction);
+				individualGenes[i] = new NEATNodeGene(nodeGene.getInnovationNumber(), nodeGene.id(), RandomUtils.nextPlusMinusOne(), nodeGene.getType(), nodeGene.getLabel(), RandomUtils.nextDouble(), activationFunction);
 			} else if (templateGenes[i] instanceof NEATLinkGene) {
 				linkGene = (NEATLinkGene)templateGenes[i];
-				individualGenes[i] = new NEATLinkGene(linkGene.getInnovationNumber(), true, linkGene.getFromId(), linkGene.getToId(), MathUtils.nextPlusMinusOne());
+				individualGenes[i] = new NEATLinkGene(linkGene.getInnovationNumber(), true, linkGene.getFromId(), linkGene.getToId(), RandomUtils.nextPlusMinusOne());
 			} else if (templateGenes[i] instanceof NEATFeatureGene) {
 				featureGene = (NEATFeatureGene)templateGenes[i];
-				individualGenes[i] = new NEATFeatureGene(featureGene.getInnovationNumber(), MathUtils.nextDouble());
+				individualGenes[i] = new NEATFeatureGene(featureGene.getInnovationNumber(), RandomUtils.nextDouble());
 			}
 		}
 
 		return (new NEATChromosome(individualGenes));
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.ga.core.Population#updatePopulation(org.neat4j.ailibrary.ga.core.Chromosome[])
-	 */
 	public void updatePopulation(Chromosome[] newGenoTypes) {
 		if (newGenoTypes.length == this.popSize) {
 			System.arraycopy(newGenoTypes, 0, this.chromosomes, 0, this.popSize);

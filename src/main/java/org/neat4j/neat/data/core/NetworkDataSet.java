@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @author MSimmerson
  *
  */
-public interface NetworkDataSet extends Serializable {
+public interface NetworkDataSet extends Serializable{
 	public NetworkInputSet inputSet();
 	public ExpectedOutputSet expectedOutputSet();
 }

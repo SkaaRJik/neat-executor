@@ -9,7 +9,7 @@ package org.neat4j.neat.core;
 
 /**
  * @author MSimmerson
- *
+ * 
  * Link gene for a NEAT network
  */
 public class NEATLinkGene implements NEATGene {
@@ -20,7 +20,7 @@ public class NEATLinkGene implements NEATGene {
 	private double weight;
 	private boolean selfRecurrent = false;
 	private boolean recurrent = false;
-
+	
 	/**
 	 * @return Returns the recurrent.
 	 */
@@ -50,7 +50,7 @@ public class NEATLinkGene implements NEATGene {
 	 */
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
-		if (this.enabled == false) {
+		if (this.enabled == false) {			
 			int i = 0;
 		}
 	}
@@ -102,7 +102,7 @@ public class NEATLinkGene implements NEATGene {
 	public double getWeight() {
 		return weight;
 	}
-
+	
 	/**
 	 * Creates the gene based on the params
 	 * @param innovationNumber
@@ -118,19 +118,19 @@ public class NEATLinkGene implements NEATGene {
 		this.toId = toId;
 		this.weight = weight;
 	}
-
+	
 	/**
-	 * Not used within NEAT.
+	 * Not used within NEAT.  
 	 */
 	public Number geneAsNumber() {
 		return (new Integer(this.innovationNumber));
 	}
 
 	public String geneAsString() {
-		return (this.innovationNumber + ":" +
-				this.enabled + ":" +
+		return (this.innovationNumber + ":" + 
+				this.enabled + ":" + 
 				this.fromId + ":" +
-				this.toId + ":" +
+				this.toId + ":" + 
 				this.weight);
 	}
 }

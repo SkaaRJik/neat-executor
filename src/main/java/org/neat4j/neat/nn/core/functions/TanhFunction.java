@@ -21,9 +21,7 @@ public class TanhFunction extends ActivationFunctionImpl {
 		this.factor = 1;
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.ActivationFunction#activate(double)
-	 */
+
 	public double activate(double neuronIp) {
 		double op;
 		/*if (neuronIp < -20) {
@@ -38,7 +36,7 @@ public class TanhFunction extends ActivationFunctionImpl {
 	}
 
 	public double th(double neuronIp){
-		return (Math.exp(neuronIp)- Math.exp(-neuronIp))/(Math.exp(neuronIp)+ Math.exp(-neuronIp));
+		return (Math.exp(neuronIp)-Math.exp(-neuronIp))/(Math.exp(neuronIp)+Math.exp(-neuronIp));
 	}
 
 	public double derivative(double neuronIp) {
@@ -56,7 +54,7 @@ public class TanhFunction extends ActivationFunctionImpl {
 	public static String getStaticFunctionName(){
 		return "tanh(x)";
 	}
-	public String getFunctionName(){
+	public  String getFunctionName(){
 		return "tanh(x)";
 	}
 }

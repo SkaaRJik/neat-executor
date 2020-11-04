@@ -34,43 +34,33 @@ public class NEATNeuralNetDescriptor implements NeuralNetDescriptor {
 		this.learnable = learnable;
 		this.recurrent = recurrent;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetDescriptor#addLayerDescriptor(org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor)
-	 */
+
 	public void addLayerDescriptor(NeuralNetLayerDescriptor descriptor) {
 		this.layerDescriptors.add(descriptor);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetDescriptor#neuralNetType()
-	 */
+
 	public NeuralNetType neuralNetType() {
 		return (netType);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetDescriptor#numInputs()
-	 */
+
 	public int numInputs() {
 		return (this.netInputs);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetDescriptor#layerDescriptors()
-	 */
+
 	public Collection layerDescriptors() {
 		return (this.layerDescriptors);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#learnable()
-	 */
+
 	public Learnable learnable() {
 		return (this.learnable);
 	}
 
 	/* (non-Javadoc)
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetDescriptor#isRecurrent()
+	 *
 	 */
 	public boolean isRecurrent() {
 		return (this.recurrent);

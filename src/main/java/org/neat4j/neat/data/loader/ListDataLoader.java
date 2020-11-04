@@ -4,7 +4,8 @@
  */
 package org.neat4j.neat.data.loader;
 
-import org.apache.log4j.Category;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.neat4j.neat.data.core.NetworkDataSet;
 import org.neat4j.neat.data.core.NetworkInput;
 import org.neat4j.neat.data.core.NetworkOutput;
@@ -18,7 +19,7 @@ import java.util.List;
  *
  */
 public class ListDataLoader{
-	private static final Category cat = Category.getInstance(ListDataLoader.class);
+	private static final Logger logger = LogManager.getLogger(ListDataLoader.class);
 	private List<List<Double>> train;
 	private List<List<Double>> test;
 	private List<String> headers;
@@ -32,7 +33,7 @@ public class ListDataLoader{
 	}
 
 	/**
-	 * @see org.neat4j.ailibrary.nn.data.DataLoader#loadData()
+	 *
 	 * @return
 	 */
 
@@ -43,7 +44,7 @@ public class ListDataLoader{
 	}
 
 	private List<NetworkDataSet> createDataSets() {
-		cat.debug("Creating data sets");
+		logger.debug("Creating data sets");
 		List<NetworkDataSet> dataSets = new ArrayList<>(2);
 		ArrayList trainIps = new ArrayList();
 		ArrayList trainEOps = new ArrayList();
@@ -79,11 +80,11 @@ public class ListDataLoader{
 
 
 		}  catch (Exception e) {
-			cat.error(e.getMessage());
+			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
 
-		cat.debug("Creating data sets...Done");
+		logger.debug("Creating data sets...Done");
 		return (dataSets);
 	}
 

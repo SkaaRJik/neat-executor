@@ -10,7 +10,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataKeeper implements Serializable {
+public class DataKeeper implements Serializable{
 
 
     DataScaler dataScaler;
@@ -134,7 +134,7 @@ public class DataKeeper implements Serializable {
     }
 
 
-    public boolean writeDataIntoFile(File dest) throws IOException {
+    public boolean writeDataIntoFile(File dest) throws IOException{
 
         boolean saveOk = false;
         ObjectOutputStream s = null;
@@ -228,7 +228,7 @@ public class DataKeeper implements Serializable {
         this.trainIndexEnd = (int) Math.round(this.data.size() * percent);
     }
 
-    public DataKeeper createDataKeeperForChromosome(Chromosome chromosome) throws ExceptionInInitializerError {
+    public DataKeeper createDataKeeperForChromosome(Chromosome chromosome) throws ExceptionInInitializerError{
         List<List<Double>> newData = new ArrayList<>(data.size());
 
 
@@ -255,7 +255,7 @@ public class DataKeeper implements Serializable {
         return null;
     }
 
-    private void putDataByLayers(List<List<Double>> newData, List<String> newHeaders, NeuralNet neatNeurons) throws ExceptionInInitializerError {
+    private void putDataByLayers(List<List<Double>> newData, List<String> newHeaders, NeuralNet neatNeurons) throws ExceptionInInitializerError{
         int counter = 0;
         for (int i = 0; i < this.inputs; i++) {
             for (int j = 0; j < neatNeurons.inputLayer().size(); j++) {

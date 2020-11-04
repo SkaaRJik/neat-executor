@@ -29,12 +29,12 @@ public class NEATChromosome implements Chromosome {
 	private int inputs;
 	private int outputs;
 	private List<List<Double>> outputValues;
-
+	
 	public NEATChromosome(Gene[] genes) {
 		this.updateChromosome(genes);
 	}
 
-
+	
 	/**
 	 * @return Returns the specieId.
 	 */
@@ -101,7 +101,7 @@ public class NEATChromosome implements Chromosome {
 				returnVal = 1;
 			}
 		}
-
+		
 		return (returnVal);
 	}
 

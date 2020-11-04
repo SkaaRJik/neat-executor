@@ -17,9 +17,7 @@ public class ModifiableInput implements ModifiableNetworkInput {
 	public ModifiableInput(NetworkInput ip) {
 		this.ip = ip;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkInput#pattern()
-	 */
+
 	public double[] pattern() {
 		return (this.ip.pattern());
 	}

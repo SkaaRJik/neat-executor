@@ -40,30 +40,30 @@ public class NEATNeuron implements Neuron {
 		this.depth = -1;
 		this.label = label;
 	}
-
+	
 	public void addSourceNeuron(NEATNeuron neuron) {
 		this.sourceNeurons.add(neuron);
 	}
-
+	
 	public void addIncomingSynapse(Synapse synapse) {
 		this.incomingSynapses.add(synapse);
 	}
-
+	
 	public ArrayList<Synapse> incomingSynapses() {
 		return (this.incomingSynapses);
 	}
-
+	
 	public ArrayList<NEATNeuron> sourceNeurons() {
 		return (this.sourceNeurons);
 	}
-
+	
 	public double lastActivation() {
 		return (this.lastActivation);
 	}
-
+	
 	/**
 	 * If it is an input neuron, returns the input, else will run through the specified activation function.
-	 *
+	 * 
 	 */
 	public double activate(double[] nInputs) {
 		double neuronIp = 0;
@@ -92,7 +92,7 @@ public class NEATNeuron implements Neuron {
 			//neuronIp = nInputs[0];
 			this.lastActivation = nInputs[0];
 		}
-
+		
 		return (this.lastActivation);
 	}
 
@@ -133,11 +133,11 @@ public class NEATNeuron implements Neuron {
 	public int id() {
 		return (this.id);
 	}
-
+	
 	public NEATNodeGene.TYPE neuronType() {
 		return (this.type);
 	}
-
+	
 	public int neuronDepth() {
 		return (this.depth);
 	}

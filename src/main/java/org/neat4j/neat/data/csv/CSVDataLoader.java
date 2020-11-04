@@ -4,7 +4,8 @@
  */
 package org.neat4j.neat.data.csv;
 
-import org.apache.log4j.Category;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.neat4j.neat.data.core.*;
 import org.neat4j.neat.data.set.*;
 
@@ -19,7 +20,7 @@ import java.util.StringTokenizer;
  */
 @Deprecated
 public class CSVDataLoader implements DataLoader {
-	private static final Category cat = Category.getInstance(CSVDataLoader.class);
+	private static final Logger logger = LogManager.getLogger(CSVDataLoader.class);
 	private String fileName;
 	private int opCols;
 	
@@ -28,16 +29,16 @@ public class CSVDataLoader implements DataLoader {
 		this.opCols = opCols;
 	}
 	/**
-	 * @see org.neat4j.ailibrary.nn.data.DataLoader#loadData()
+	 *
 	 * @return
 	 */
 	public NetworkDataSet loadData() {
-		cat.info("Loading data from " + this.fileName);
+		logger.info("Loading data from " + this.fileName);
 		return createDataSets();
 	}
 	
 	private NetworkDataSet createDataSets() {
-		cat.debug("Creating data sets");
+		logger.debug("Creating data sets");
 		NetworkDataSet dataSet = null;
 		File csvFile = new File(this.fileName);
 		FileInputStream fis = null;
@@ -73,26 +74,26 @@ public class CSVDataLoader implements DataLoader {
 			dataSet = new DataSetImpl(ipSet, opSet);
 			fis.close();
 		} catch (FileNotFoundException e) {
-			cat.error(e.getMessage());
+			logger.error(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			cat.error(e.getMessage());
+			logger.error(e.getMessage());
 			e.printStackTrace();
 		} catch (Exception e) {
-			cat.error(e.getMessage());
+			logger.error(e.getMessage());
 			e.printStackTrace();
 		} finally {
 			if(fis != null) {
 				try {
 					fis.close();
 				} catch (IOException e) {
-					cat.error(e.getMessage());
+					logger.error(e.getMessage());
 					e.printStackTrace();
 				}
 			}
 		}
 		
-		cat.debug("Creating data sets...Done");
+		logger.debug("Creating data sets...Done");
 		return (dataSet);
 	}
 	

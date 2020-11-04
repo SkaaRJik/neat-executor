@@ -6,7 +6,8 @@
  */
 package org.neat4j.neat.ga.core;
 
-import org.apache.log4j.Category;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.neat4j.neat.core.NEATChromosome;
 import org.neat4j.neat.core.NEATSpecie;
 
@@ -18,17 +19,17 @@ import java.util.ArrayList;
  * Generic specie handling
  */
 public class Species {
-	private static final Category cat = Category.getInstance(Species.class);
+	private static final Logger logger = LogManager.getLogger(Species.class);
 	private ArrayList specieList;
-
+	
 	public Species() {
 		this.specieList = new ArrayList();
 	}
-
+	
 	public void addSpecie(Specie specie) {
 		this.specieList.add(specie);
 	}
-
+	
 	public ArrayList specieList() {
 		return (this.specieList);
 	}
@@ -42,7 +43,7 @@ public class Species {
 		ArrayList validSpecies = new ArrayList();
 		Specie specie;
 		int i;
-
+		
 		for (i = 0; i < this.specieList.size(); i++) {
 			specie = (Specie)this.specieList.get(i);
 			// always include champion specie
@@ -50,10 +51,10 @@ public class Species {
 				validSpecies.add(specie);
 			}
 		}
-
+				
 		return (validSpecies);
 	}
-
+	
 	/**
 	 * Clears down all the current species
 	 * @param threshold
@@ -61,7 +62,7 @@ public class Species {
 	public void resetSpecies(double threshold) {
 		int i;
 		Specie specie;
-
+		
 		for (i = 0; i < this.specieList.size(); i++) {
 			specie = (Specie)this.specieList.get(i);
 			if (!specie.isExtinct()) {
@@ -69,11 +70,11 @@ public class Species {
 			}
 		}
 	}
-
+	
 	public void shareFitness() {
 		int i;
 		Specie specie;
-
+		
 		for (i = 0; i < this.specieList.size(); i++) {
 			specie = (Specie)this.specieList.get(i);
 			if (specie.specieMembers().size() > 0) {
@@ -82,63 +83,63 @@ public class Species {
 			}
 		}
 	}
-
+	
 	public double totalAvSpeciesFitness() {
 		int i;
 		Specie specie;
 		double totalFitness = 0;
-
+		
 		for (i = 0; i < this.specieList.size(); i++) {
 			specie = (Specie)this.specieList.get(i);
 			if (!specie.isExtinct() && specie.specieMembers().size() > 0) {
 				totalFitness += specie.averageFitness();
 			}
 		}
-
+		
 		return (totalFitness);
 	}
-
+	
 	public void removeExtinctSpecies(NEATChromosome champion) {
 		int i = 0;
 		Specie specie;
-
+		
 		while (i < this.specieList.size()) {
-			specie = (Specie)this.specieList.get(i);
+			specie = (Specie)this.specieList.get(i);			
 			if (specie.isExtinct() || specie.specieMembers().size() == 0) {
 				if (!specie.containsMember(champion) && (this.specieList.size() > 1)) {
-					cat.info("Removing specie " + specie.id() + " size:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
+					logger.info("Removing specie " + specie.id() + " size:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
 					this.specieList.remove(i);
 				} else {
-					cat.info("Specie " + specie.id() + " saved:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
+					logger.info("Specie " + specie.id() + " saved:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
 					specie.reprieve();
 					i++;
 				}
 			} else {
 				i++;
 			}
-		}
+		}		
 	}
-
+	
 	public Chromosome findBestFromSpecies() {
 		Chromosome best = null;
 		int i;
 		Specie specie;
-
+		
 		for (i = 0; i < this.specieList.size(); i++) {
 			specie = (Specie)this.specieList.get(i);
 			if (specie.specieMembers().size() > 0) {
 				if ((best == null) || (best.fitness() > specie.findBestMember().fitness())) {
-					best = specie.findBestMember();
-				}
+					best = specie.findBestMember();					
+				} 
 			}
 		}
-
+		
 		return (best);
 	}
-
+	
 	public int calcSpecieOffspringCount(Specie specie, int popSize, double totalAvFitness) {
-		int count = (int) Math.floor((specie.averageFitness() / totalAvFitness) * popSize);
-
+		int count = (int)Math.floor((specie.averageFitness() / totalAvFitness) * popSize);
+		
 		return (count);
 	}
 
@@ -147,7 +148,7 @@ public class Species {
 		boolean specieFound = false;
 		NEATSpecie testSpecie;
 		int i = 0;
-
+		
 		while (!specieFound && i < this.specieList.size() && specieId >= 1) {
 			testSpecie = (NEATSpecie)this.specieList.get(i);
 			if (testSpecie.id() == specieId) {
@@ -156,7 +157,7 @@ public class Species {
 			}
 			i++;
 		}
-
+		
 		return (selectedSpecie);
 	}
 }

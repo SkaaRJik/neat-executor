@@ -7,11 +7,11 @@ import java.util.List;
  * @author MSimmerson
  *
  */
-public interface NetworkInputSet extends Serializable {
+public interface NetworkInputSet extends Serializable{
 
 	public int size();
 	public NetworkInput nextInput();
-	public NetworkInput inputAt(int idx);
+	public NetworkInput inputAt(int idx);	
 	public void removeInputAt(int idx);
 	List<String> getHeaders();
 	void setHeaders(List<String> headers);

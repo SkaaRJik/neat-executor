@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Random;
 
 public class ActivationFunctionContainer {
-   private List<ActivationFunctionImpl> inputActivationFunctions;
-   private List<ActivationFunctionImpl> hiddenActivationFunctions;
-   private List<ActivationFunctionImpl> outputActivationFunctions;
+   private  List<ActivationFunctionImpl> inputActivationFunctions;
+   private  List<ActivationFunctionImpl> hiddenActivationFunctions;
+   private  List<ActivationFunctionImpl> outputActivationFunctions;
 
     public void setInputActivationFunctions(List<ActivationFunctionImpl> inputActivationFunctions) {
         this.inputActivationFunctions = inputActivationFunctions;

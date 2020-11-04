@@ -29,7 +29,7 @@ public class NEATNodeGene implements NEATGene {
 	private ActivationFunction activationFunction;
 	private String label;
 
-	public NEATNodeGene(int innovationNumber, int id, double sigmoidF, TYPE type, String label, double bias, ActivationFunction activationFunction) {
+	public NEATNodeGene(int innovationNumber, int id, double sigmoidF, TYPE type, String label,double bias, ActivationFunction activationFunction) {
 		this.innovationNumber = innovationNumber;
 		this.id = id;
 		this.sigmoidFactor = sigmoidF;
@@ -39,7 +39,7 @@ public class NEATNodeGene implements NEATGene {
 		this.activationFunction = activationFunction;
 		this.label = label;
 	}
-
+	
 	private void initialiseDepth() {
 		if (this.type == TYPE.INPUT) {
 			this.depth = 0;
@@ -47,7 +47,7 @@ public class NEATNodeGene implements NEATGene {
 			this.depth = 1;
 		}
 	}
-
+	
 	/**
 	 * @return Returns the depth.
 	 */
@@ -64,7 +64,7 @@ public class NEATNodeGene implements NEATGene {
 	public void setSigmoidFactor(double bias) {
 		this.sigmoidFactor = bias;
 	}
-
+	
 	public TYPE getType() {
 		return type;
 	}
@@ -80,7 +80,7 @@ public class NEATNodeGene implements NEATGene {
 	public double sigmoidFactor() {
 		return (this.sigmoidFactor);
 	}
-
+	
 	public Number geneAsNumber() {
 		return (new Integer(this.innovationNumber));
 	}
