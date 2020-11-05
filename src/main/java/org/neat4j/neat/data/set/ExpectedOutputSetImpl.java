@@ -18,10 +18,10 @@ public class ExpectedOutputSetImpl implements ExpectedOutputSet {
 
 	List<String> headers;
 
-	private ArrayList ops;
+	private List<NetworkOutput> ops;
 	private int idx;
 	
-	public ExpectedOutputSetImpl(List<String> headers, ArrayList eOps) {
+	public ExpectedOutputSetImpl(List<String> headers, List<NetworkOutput> eOps) {
 		this.idx = 0;
 		this.ops = eOps;
 		this.headers = headers;

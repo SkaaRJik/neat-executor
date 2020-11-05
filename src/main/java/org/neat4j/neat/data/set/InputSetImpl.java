@@ -18,10 +18,10 @@ public class InputSetImpl implements NetworkInputSet {
 
 
 	private List<String> headers;
-	private List inputs;
+	private List<NetworkInput> inputs;
 	private int idx;
 	
-	public InputSetImpl(List<String> headers , ArrayList inputs) {
+	public InputSetImpl(List<String> headers , List<NetworkInput> inputs) {
 		this.headers = headers;
 		this.inputs = inputs;
 		this.idx = 0;

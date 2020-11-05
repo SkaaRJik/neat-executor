@@ -9,7 +9,9 @@ import org.neat4j.neat.core.NEATConfig;
 import org.neat4j.neat.core.NEATGADescriptor;
 import org.neat4j.neat.core.NEATGeneticAlgorithm;
 import org.neat4j.neat.core.control.NEATNetManager;
+import org.neat4j.neat.core.control.NEATNetManagerForService;
 import org.neat4j.neat.core.fitness.InvalidFitnessFunction;
+import org.neat4j.neat.core.fitness.MSENEATFitnessFunction;
 import org.neat4j.neat.data.core.DataKeeper;
 import org.neat4j.neat.data.core.NetworkDataSet;
 import org.neat4j.neat.ga.core.Chromosome;
@@ -21,6 +23,7 @@ import org.neat4j.neat.nn.core.NeuralNet;
 import org.neat4j.neat.utils.NumberUtils;
 import org.neat4j.neat.utils.RandomUtils;
 import ru.filippov.neatexecutor.entity.NeatConfigEntity;
+import ru.filippov.neatexecutor.entity.ProjectConfig;
 
 import java.io.IOException;
 import java.util.List;
@@ -237,18 +240,17 @@ public class NEATTrainingForService implements Runnable {
         return (descriptor);
     }
 
-    public FitnessFunction createFunction() throws InvalidFitnessFunction {
+    public FitnessFunction createFunction(AIConfig aiConfig, ProjectConfig.NormalizedDataDto normalizedDataDto) throws InvalidFitnessFunction {
         FitnessFunction function = null;
-        AIConfig nnConfig;
-        NEATNetManager netManager;
+        NEATNetManagerForService netManager;
         NeuralNet net = null;
         NetworkDataSet dataSet = null;
         NetworkDataSet testSet = null;
         LearningEnvironment env;
 
-		/*try {
+		try {
 
-            nnConfig = new NEATConfig();
+            /*nnConfig = new NEATConfig();
             //nnConfig  = new NEATLoader().loadConfig(nnConfigFile);
             nnConfig.updateConfig("INPUT_SIZE", config.configElement("INPUT.NODES"));
             nnConfig.updateConfig("OUTPUT_SIZE", config.configElement("OUTPUT.NODES"));
@@ -256,22 +258,22 @@ public class NEATTrainingForService implements Runnable {
             if(!config.configElement("TRAINING.SET").matches("/"))
                 config.updateConfig("TRAINING.SET", config.configElement("CONFIGURATION.FILEPATH")+"/"+config.configElement("TRAINING.SET"));
             else
-                config.updateConfig("TRAINING.SET", config.configElement("TRAINING.SET"));
+                config.updateConfig("TRAINING.SET", config.configElement("TRAINING.SET"));*/
 
-            netManager = new NEATNetManager();
-            netManager.initialise(config, true);
-            net = netManager.managedNet();
+            netManager = new NEATNetManagerForService(aiConfig, normalizedDataDto);
+            netManager.initialise(aiConfig, );
+            /*net = netManager.managedNet();
             env = net.netDescriptor().learnable().learningEnvironment();
             dataSet = (NetworkDataSet)env.learningParameter("TRAINING.SET");
             testSet = (NetworkDataSet)env.learningParameter("TEST.SET");
-            function = new MSENEATFitnessFunction(net, dataSet, testSet);
+            function = new MSENEATFitnessFunction(net, dataSet, testSet);*/
 
 		}  catch (IllegalArgumentException e) {
 			throw new InvalidFitnessFunction("Invalid function class, " + function.getClass() + " must extend " + NeuralFitnessFunction.class.getName() + ":" + e.getMessage());
 		}  catch (InitialisationFailedException e) {
 			e.printStackTrace();
 			throw new InvalidFitnessFunction("Could not create Firness function, configuration was invalid:" + e.getMessage());
-		}*/
+		}
 
         return (function);
     }
