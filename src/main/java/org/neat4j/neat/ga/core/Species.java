@@ -107,10 +107,10 @@ public class Species {
 			specie = (Specie)this.specieList.get(i);			
 			if (specie.isExtinct() || specie.specieMembers().size() == 0) {
 				if (!specie.containsMember(champion) && (this.specieList.size() > 1)) {
-					logger.info("Removing specie " + specie.id() + " size:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
+					logger.debug("Removing specie " + specie.id() + " size:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
 					this.specieList.remove(i);
 				} else {
-					logger.info("Specie " + specie.id() + " saved:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
+					logger.debug("Specie " + specie.id() + " saved:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
 					specie.reprieve();
 					i++;
 				}

@@ -172,7 +172,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		
 		this.specieList.resetSpecies(this.descriptor.getThreshold());
 		
-		logger.info("Compat threshold:" + this.descriptor.getThreshold());
+		logger.debug("Compat threshold:" + this.descriptor.getThreshold());
 		for (i = 0; i < currentGen.length; i++) {
 			if (!memberAssigned) {
 				currentSpecieList = this.specieList.specieList();
@@ -192,7 +192,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 					specie = this.createNewSpecie(currentGen[i]);
 					this.specieList.addSpecie(specie);
 					//((NEATChromosome)currentGen[i]).setSpecieId(specie.id());
-					logger.info("Created new specie, member assigned to specie " + specie.id());
+					logger.debug("Created new specie, member assigned to specie " + specie.id());
 				}
 			}
 			memberAssigned = false;
@@ -227,7 +227,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 			// copy best
 			this.discoveredBest = this.cloneBest(this.genBest);
 		}
-		logger.info("Best Ever Raw:" + (this.discoveredBest.fitness()) + ":from specie:" + ((NEATChromosome)this.discoveredBest).getSpecieId());
+		logger.debug("Best Ever Raw:" + (this.discoveredBest.fitness()) + ":from specie:" + ((NEATChromosome)this.discoveredBest).getSpecieId());
 		logger.debug("Best of Generation is:" + (this.genBest.fitness()) + " specie " + ((NEATChromosome)this.genBest).getSpecieId());
 		// kill any extinct species
 		if (this.descriptor.keepBestEver()) {
@@ -255,7 +255,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	private void runEle(Chromosome[] currentGen) {
 		if (this.descriptor.isEleEvents()) {
 			if ((this.eleCount % this.descriptor.getEleEventTime()) == 0 && this.eleCount != 0) {
-				logger.info("Runnig ELE");
+				logger.debug("Runnig ELE");
 				this.descriptor.setThreshold(this.descriptor.getThreshold() * 5);
 			} else if ((this.eleCount % this.descriptor.getEleEventTime()) == 1 && this.eleCount != 1) {
 				this.descriptor.setThreshold(this.descriptor.getThreshold() / 5.0);

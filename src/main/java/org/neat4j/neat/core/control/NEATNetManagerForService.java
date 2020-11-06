@@ -78,7 +78,7 @@ public class NEATNetManagerForService implements AIController {
 	}
 
 	public List<NetworkDataSet>  dataSet() {
-
+		logger.warn("dataSet");
 		int trainEndIndex = this.normalizedDataDto.getTrainEndIndex();
 		int testEndIndex = this.normalizedDataDto.getTestEndIndex();
 

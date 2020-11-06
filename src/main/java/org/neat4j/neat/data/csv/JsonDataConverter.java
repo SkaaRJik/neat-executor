@@ -30,7 +30,6 @@ public class JsonDataConverter {
 
 
     public List<NetworkDataSet> loadData() {
-        logger.warn("LOAD DATA!!!");
         return createDataSets();
     }
 

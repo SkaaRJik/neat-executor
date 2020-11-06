@@ -124,7 +124,7 @@ public class NEATTrainingForService implements Runnable {
             if(Thread.interrupted()) {
                 break;
             }
-            logger.info("Running Epoch[" + i + "]\r");
+            logger.debug("Running Epoch[" + i + "]\r");
             this.geneticAlgorithm.runEpoch();
             this.saveBest();
 
@@ -135,7 +135,7 @@ public class NEATTrainingForService implements Runnable {
 
             i++;
             //status.setValue(((double)i)/epochs);
-            this.saveDataForGUI(i);
+
             if(terminate && terminateEnabled) {
                 //status.setValue(1);
                 break;
@@ -143,25 +143,9 @@ public class NEATTrainingForService implements Runnable {
 
         }
         this.timeSpend = (double)(System.currentTimeMillis() - startTime) / 1000;
-
+        Chromosome chromosome = bestEverChromosomes.get(bestEverChromosomes.size() - 1);
+        logger.info(String.format("trainError: [ %f ], testError: [ %f ], timeSpend: [ %f ]", chromosome.getTrainError(), chromosome.getValidationError(), timeSpend));
         logger.debug("Innovation Database Stats - Hits:" + innovationDatabase.totalHits + " - totalMisses:" + innovationDatabase.totalMisses);
-    }
-
-    private void saveDataForGUI(int i) {
-        /*Chromosome best = this.ga.discoverdBestMember();
-        logger.info("Save GUI[" + i + "]\r");
-
-        this.lastTrainError = best.getTrainError();
-        this.lastValidationError = best.getValidationError();
-        currentEpoch = i+1;*/
-
-
-        /*this.errorData.add();
-        if(best.getValidationError()!=null){
-            this.validationErrorData.add(this.createXYChart(i, best.getValidationError()));
-        }*/
-
-
     }
 
     public void saveBest() {
