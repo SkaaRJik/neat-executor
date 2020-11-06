@@ -89,11 +89,11 @@ public class NEATNetManager implements AIController {
 		if(init) {
 			dSet = this.dataSet("TRAINING.SET", config, numOutputs);
 		}
-			le.addEnvironmentParameter("TRAINING.SET", dSet);
+		le.setTrainDataSet( dSet);
 		if(init) {
 			dSet = this.dataSet("TEST.SET", config, numOutputs);
 		}
-		le.addEnvironmentParameter("TEST.SET", dSet);
+		le.setTestDataSet( dSet);
 
 		Learnable learnable = new GALearnable(le);
 		logger.debug("learnableClassName:" + learnable.getClass().getName());

@@ -30,15 +30,12 @@ public class JsonDataConverter {
 
 
     public List<NetworkDataSet> loadData() {
+        logger.warn("LOAD DATA!!!");
         return createDataSets();
     }
 
     private List<NetworkDataSet> createDataSets() {
         logger.debug("Creating data sets");
-        NetworkDataSet trainDataSet = null;
-        NetworkDataSet testDataSet = null;
-
-
 
         try {
             List<String> inputHeaders = new ArrayList<>(inputsCount);
@@ -85,41 +82,33 @@ public class JsonDataConverter {
         List<NetworkInput> testIps = new ArrayList();
 
         for (int i = 0; i < inputColumns.get(0).size(); i++) {
-            double[] trainPattern = new double[trainEndIndex];
-            double[] testPattern = new double[testEndIndex-trainEndIndex];
-            int trainPatternIndex = 0;
-            int testPatternIndex = 0;
+            double[] pattern = new double[inputColumns.size()];
+            int patternIndex = 0;
             for (int j = 0; j < inputColumns.size(); j++) {
-                if( i < trainEndIndex) {
-                    trainPattern[trainPatternIndex++] = inputColumns.get(i).get(j);
-                } else if(i >= trainEndIndex && i < testEndIndex){
-                    testPattern[testPatternIndex++] = inputColumns.get(i).get(j);
-                }
+                pattern[patternIndex++] = inputColumns.get(j).get(i);
             }
-            trainIps.add(new InputImpl(trainPattern));
-            testIps.add(new InputImpl(testPattern));
+            if( i < trainEndIndex) {
+                trainIps.add(new InputImpl(pattern));
+            } else if(i >= trainEndIndex && i < testEndIndex){
+                testIps.add(new InputImpl(pattern));
+            }
         }
+
+
 
         for (int i = 0; i < outputColumns.get(0).size(); i++) {
-            double[] trainPattern = new double[trainEndIndex];
-            double[] testPattern = new double[testEndIndex-trainEndIndex];
-            int trainPatternIndex = 0;
-            int testPatternIndex = 0;
-            for (int j = 0; j < inputColumns.size(); j++) {
-                if( i < trainEndIndex) {
-                    trainPattern[trainPatternIndex++] = inputColumns.get(i).get(j);
-                } else if(i >= trainEndIndex && i < testEndIndex){
-                    testPattern[testPatternIndex++] = inputColumns.get(i).get(j);
-                }
+            double[] pattern = new double[outputColumns.size()];
+            int patternIndex = 0;
+            for (int j = 0; j < outputColumns.size(); j++) {
+                pattern[patternIndex++] = outputColumns.get(j).get(i);
             }
-            trainOps.add(new ExpectedOutputImpl(trainPattern));
-            testOps.add(new ExpectedOutputImpl(testPattern));
+            if( i < trainEndIndex) {
+                trainOps.add(new ExpectedOutputImpl(pattern));
+            } else if(i >= trainEndIndex && i < testEndIndex){
+                testOps.add(new ExpectedOutputImpl(pattern));
+            }
         }
-
-
-
-
-
+        
 
         NetworkInputSet ipTrainSet = new InputSetImpl(inputHeaders, trainIps);
         ExpectedOutputSet opTrainSet = new ExpectedOutputSetImpl(outputHeaders, trainOps);

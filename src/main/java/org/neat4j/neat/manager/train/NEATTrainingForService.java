@@ -12,12 +12,12 @@ import org.neat4j.neat.core.control.NEATNetManager;
 import org.neat4j.neat.core.control.NEATNetManagerForService;
 import org.neat4j.neat.core.fitness.InvalidFitnessFunction;
 import org.neat4j.neat.core.fitness.MSENEATFitnessFunction;
+import org.neat4j.neat.core.mutators.NEATMutator;
+import org.neat4j.neat.core.pselectors.TournamentSelector;
+import org.neat4j.neat.core.xover.NEATCrossover;
 import org.neat4j.neat.data.core.DataKeeper;
 import org.neat4j.neat.data.core.NetworkDataSet;
-import org.neat4j.neat.ga.core.Chromosome;
-import org.neat4j.neat.ga.core.FitnessFunction;
-import org.neat4j.neat.ga.core.GADescriptor;
-import org.neat4j.neat.ga.core.GeneticAlgorithm;
+import org.neat4j.neat.ga.core.*;
 import org.neat4j.neat.nn.core.LearningEnvironment;
 import org.neat4j.neat.nn.core.NeuralNet;
 import org.neat4j.neat.utils.NumberUtils;
@@ -26,6 +26,7 @@ import ru.filippov.neatexecutor.entity.NeatConfigEntity;
 import ru.filippov.neatexecutor.entity.ProjectConfig;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
@@ -35,14 +36,16 @@ public class NEATTrainingForService implements Runnable {
 
 
     private int numberOfThreads = 2;
-
+    private AIConfig config;
     private List<Chromosome> bestEverChromosomes;
 
     protected GeneticAlgorithm geneticAlgorithm;
     protected Random random;
     protected InnovationDatabase innovationDatabase;
+    private double timeSpend;
 
     public NEATTrainingForService(NeatConfigEntity neatConfigEntity) throws InitialisationFailedException, IOException {
+
         Properties prop = new Properties();
 
         //load a properties file from class path, inside static method
@@ -81,25 +84,21 @@ public class NEATTrainingForService implements Runnable {
         try {
             AIConfig aiConfig = this.parseNeatSetting(neatConfigEntity.getNeatSettings());
 
+            this.config = aiConfig;
             this.random = RandomUtils.setSeed((Long) aiConfig.getConfigElementByName("GENERATOR.SEED"));
             GADescriptor gaDescriptor = this.createDescriptor(aiConfig);
             this.geneticAlgorithm = this.createGeneticAlgorithm(gaDescriptor);
             this.innovationDatabase = new InnovationDatabase(this.random, this.geneticAlgorithm.pluginAllowedActivationFunctions(aiConfig));
-            this.geneticAlgorithm.pluginFitnessFunction(this.createFunction());
-/*        try {
-            this.assignConfig(config);
-            innovationDatabase = new InnovationDatabase(this.random, this.ga.pluginAllowedActivationFunctions(config));
-            this.ga.pluginFitnessFunction(this.createFunction());
-            this.ga.pluginCrossOver(new NEATCrossover());
-            this.ga.pluginMutator(new NEATMutator(this.random, innovationDatabase));
-            this.ga.pluginParentSelector(new TournamentSelector(this.random));
-            this.ga.createPopulation(innovationDatabase);
-        */
+            this.geneticAlgorithm.pluginFitnessFunction(this.createFunction(aiConfig, neatConfigEntity.getNormalizedData()));
+            this.geneticAlgorithm.pluginCrossOver(new NEATCrossover());
+            this.geneticAlgorithm.pluginMutator(new NEATMutator(this.random, innovationDatabase));
+            this.geneticAlgorithm.pluginParentSelector(new TournamentSelector(this.random));
+            this.geneticAlgorithm.createPopulation(innovationDatabase);
         } catch (InvalidFitnessFunction e) {
-
+            logger.error("[NEATTrainingForService].initialise", e);
             throw new InitialisationFailedException(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("[NEATTrainingForService].initialise", e);
             throw new InitialisationFailedException(e.getMessage());
         }
     }
@@ -109,38 +108,16 @@ public class NEATTrainingForService implements Runnable {
         return ga;
     }
 
-    public void initialise(AIConfig config, DataKeeper trainDataSet, String pathToSave) throws InitialisationFailedException, IOException {
-
-        /*config.updateConfig("TRAINING.SET", TEMP_DIRECTORY_PATH.getAbsolutePath()+"\\"+ UUID.randomUUID()+".tmp");
-        trainDataSet.saveSet(config.getConfigElementByName("TRAINING.SET"), trainDataSet.getTrainData());
-
-
-        List<List<Double>> testData = trainDataSet.getTestData();
-        if(testData!=null) {
-            config.updateConfig("TEST.SET", TEMP_DIRECTORY_PATH.getAbsolutePath() + "\\" + UUID.randomUUID() + ".tmp");
-            trainDataSet.saveSet(config.getConfigElementByName("TEST.SET"), trainDataSet.getTestData());
-        }
-        config.updateConfig("SAVE.LOCATION", pathToSave);
-
-
-
-
-        logger.debug("trainModel() : tempDataset name " + config.getConfigElementByName("TRAINING.SET"));
-        //this.dataKeeper.setValue(trainDataSet);
-        this.initialise(config);*/
-
-    }
-
     public void evolve() {
 
-       /* int epochs = this.asInt(config.getConfigElementByName("NUMBER.EPOCHS"));
-        double terminateVal = ((NEATGADescriptor)this.ga.getDescriptor()).getErrorTerminationValue();
-        boolean terminateEnabled = ((NEATGADescriptor)this.ga.getDescriptor()).isToggleErrorTerminationValue();
-        boolean nOrder = ((NEATGADescriptor)this.ga.getDescriptor()).isNaturalOrder();
+        int epochs = NumberUtils.asInt(config.getConfigElementByName("NUMBER.EPOCHS"));
+        this.bestEverChromosomes = new ArrayList<>(epochs);
+        double terminateVal = ((NEATGADescriptor)this.geneticAlgorithm.getDescriptor()).getErrorTerminationValue();
+        boolean terminateEnabled = ((NEATGADescriptor)this.geneticAlgorithm.getDescriptor()).isToggleErrorTerminationValue();
+        boolean nOrder = this.geneticAlgorithm.getDescriptor().isNaturalOrder();
         boolean terminate = false;
 
 
-        pathToSave = config.getConfigElementByName("SAVE.LOCATION");
         int i = 0;
         Long startTime = System.currentTimeMillis();
         while (i < epochs) {
@@ -148,10 +125,11 @@ public class NEATTrainingForService implements Runnable {
                 break;
             }
             logger.info("Running Epoch[" + i + "]\r");
-            this.ga.runEpoch();
+            this.geneticAlgorithm.runEpoch();
             this.saveBest();
 
-            if ((this.ga.discoverdBestMember().fitness() >= terminateVal && !nOrder) || (this.ga.discoverdBestMember().fitness() <= terminateVal && nOrder)) {
+            if ((this.geneticAlgorithm.discoverdBestMember().fitness() >= terminateVal && !nOrder)
+                    || (this.geneticAlgorithm.discoverdBestMember().fitness() <= terminateVal && nOrder)) {
                 terminate = true;
             }
 
@@ -165,10 +143,8 @@ public class NEATTrainingForService implements Runnable {
 
         }
         this.timeSpend = (double)(System.currentTimeMillis() - startTime) / 1000;
-        //this.status.setValue(1.0);
-        //this.isEnded.setValue(true);
+
         logger.debug("Innovation Database Stats - Hits:" + innovationDatabase.totalHits + " - totalMisses:" + innovationDatabase.totalMisses);
-*/
     }
 
     private void saveDataForGUI(int i) {
@@ -189,14 +165,11 @@ public class NEATTrainingForService implements Runnable {
     }
 
     public void saveBest() {
-        /*Chromosome best = this.ga.discoverdBestMember();
-        best.setInputs(this.asInt(config.getConfigElementByName("INPUT.NODES")));
-        best.setOutputs(this.asInt(config.getConfigElementByName("OUTPUT.NODES")));
+        Chromosome best = this.geneticAlgorithm.discoverdBestMember();
+        best.setInputs(NumberUtils.asInt(config.getConfigElementByName("INPUT.NODES")));
+        best.setOutputs(NumberUtils.asInt(config.getConfigElementByName("OUTPUT.NODES")));
 
-        //this.bestEverChromosomeProperty.setValue(best);
-        if(pathToSave != null)
-            this.save(pathToSave, best);
-        bestEverChromosomes.add(best);*/
+        bestEverChromosomes.add(best);
     }
 
     public GADescriptor createDescriptor(AIConfig config) {
@@ -249,29 +222,16 @@ public class NEATTrainingForService implements Runnable {
         LearningEnvironment env;
 
 		try {
-
-            /*nnConfig = new NEATConfig();
-            //nnConfig  = new NEATLoader().loadConfig(nnConfigFile);
-            nnConfig.updateConfig("INPUT_SIZE", config.configElement("INPUT.NODES"));
-            nnConfig.updateConfig("OUTPUT_SIZE", config.configElement("OUTPUT.NODES"));
-            nnConfig.updateConfig("LEARNABLE", config.configElement("LEARNABLE"));
-            if(!config.configElement("TRAINING.SET").matches("/"))
-                config.updateConfig("TRAINING.SET", config.configElement("CONFIGURATION.FILEPATH")+"/"+config.configElement("TRAINING.SET"));
-            else
-                config.updateConfig("TRAINING.SET", config.configElement("TRAINING.SET"));*/
-
             netManager = new NEATNetManagerForService(aiConfig, normalizedDataDto);
-            netManager.initialise(aiConfig, );
-            /*net = netManager.managedNet();
+            netManager.initialise(aiConfig, true);
+            net = netManager.managedNet();
             env = net.netDescriptor().learnable().learningEnvironment();
-            dataSet = (NetworkDataSet)env.learningParameter("TRAINING.SET");
-            testSet = (NetworkDataSet)env.learningParameter("TEST.SET");
-            function = new MSENEATFitnessFunction(net, dataSet, testSet);*/
-
+            dataSet = env.getTrainDataSet();
+            testSet =  env.getTestDataSet();
+            function = new MSENEATFitnessFunction(net, dataSet, testSet);
 		}  catch (IllegalArgumentException e) {
 			throw new InvalidFitnessFunction("Invalid function class, " + function.getClass() + " must extend " + NeuralFitnessFunction.class.getName() + ":" + e.getMessage());
 		}  catch (InitialisationFailedException e) {
-			e.printStackTrace();
 			throw new InvalidFitnessFunction("Could not create Firness function, configuration was invalid:" + e.getMessage());
 		}
 

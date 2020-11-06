@@ -4,6 +4,8 @@
  */
 package org.neat4j.neat.nn.core;
 
+import org.neat4j.neat.data.core.NetworkDataSet;
+
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -12,19 +14,23 @@ import java.util.HashMap;
  *
  */
 public class LearningEnvironment implements Serializable {
-	private HashMap env;
-	
-	public LearningEnvironment() {
-		this.env = new HashMap();
+
+	private NetworkDataSet trainDataSet;
+	private NetworkDataSet testDataSet;
+
+	public void setTrainDataSet(NetworkDataSet dataSet) {
+		trainDataSet = dataSet;
 	}
-	
-	public void addEnvironmentParameter(String key, Object value) {
-		if (value != null) {
-			this.env.put(key, value);
-		}
+
+	public void setTestDataSet(NetworkDataSet dataSet) {
+		testDataSet = dataSet;
 	}
-	
-	public Object learningParameter(String key) {
-		return this.env.get(key);
+
+	public NetworkDataSet getTrainDataSet() {
+		return trainDataSet;
+	}
+
+	public NetworkDataSet getTestDataSet() {
+		return testDataSet;
 	}
 }

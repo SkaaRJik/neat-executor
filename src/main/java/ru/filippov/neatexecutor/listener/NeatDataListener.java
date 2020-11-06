@@ -24,6 +24,7 @@ public class NeatDataListener{
 
         try {
             NEATTrainingForService neatgaTrainingManager = new NEATTrainingForService(neatConfigEntity);
+            neatgaTrainingManager.run();
         } catch (InitialisationFailedException e) {
             log.error("[NeatDataListener].consumeNewNeatConfig()", e);
         }

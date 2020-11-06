@@ -69,16 +69,14 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		this.setChromosomeNO(currentGen);
 		logger.debug("Evaluating pop");
 		for (int i = 0; i < this.numberOfThreads; i++) {
-			//part = getPartChromosomes(currentGen, i);
-			//Chromosome[] finalPart = part;
-			int finalI = i+1;
+			int finalI = i;
 			threads[i] = new Thread(()->{
 				calculateFitness(currentGen, (finalI)*offsetOfIndex, (finalI)*offsetOfIndex+offsetOfIndex);
 			});
 			threads[i].run();
 		}
 
-		this.calculateFitness(currentGen, 0 , offsetOfIndex);
+		/*this.calculateFitness(currentGen, 0 , offsetOfIndex);*/
 		for (int i = 0; i < numberOfThreads; i++) {
 			try {
 				threads[i].join();

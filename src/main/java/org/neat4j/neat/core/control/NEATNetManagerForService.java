@@ -31,11 +31,11 @@ public class NEATNetManagerForService implements AIController {
 	private static final Logger logger = LogManager.getLogger(NEATNetManagerForService.class);
 	private NeuralNet net;
 	private AIConfig config;
-
+	private ProjectConfig.NormalizedDataDto normalizedDataDto;
 
 	public NEATNetManagerForService(AIConfig aiConfig, ProjectConfig.NormalizedDataDto normalizedDataDto) {
 		this.config = aiConfig;
-
+		this.normalizedDataDto = normalizedDataDto;
 
 
 
@@ -46,17 +46,11 @@ public class NEATNetManagerForService implements AIController {
 		return (false);
 	}
 
-	public NeuralNetDescriptor createNetDescriptor(boolean loadData) {
-		return (this.createNetDescriptor(this.config, loadData));
-	}
-
-	public NeuralNetDescriptor createNetDescriptor(AIConfig config, boolean init) {
+	public NeuralNetDescriptor createNetDescriptor() {
 		NeuralNetDescriptor descriptor = null;
-		int inputLayerSize = Integer.parseInt((String) config.getConfigElementByName("INPUT.NODES"));
-		int outputLayerSize = Integer.parseInt((String) config.getConfigElementByName("OUTPUT.NODES"));
-		// create learnable
+		int inputLayerSize = (int) config.getConfigElementByName("INPUT.NODES");
 
-		Learnable learnable = this.createLearnable(config, outputLayerSize, init);
+		Learnable learnable = this.createLearnable();
 
 		descriptor = new NEATNetDescriptor(inputLayerSize, learnable);
 
@@ -74,7 +68,8 @@ public class NEATNetManagerForService implements AIController {
 
 	public void initialise(AIConfig config, boolean loadData) throws InitialisationFailedException {
 		this.config = config;
-
+		NeuralNetDescriptor descriptor = this.createNetDescriptor();
+		this.net = NeuralNetFactory.getFactory().createNN(descriptor);
 	}
 
 	public void initialise(Chromosome chromosome) throws InitialisationFailedException {
@@ -82,28 +77,38 @@ public class NEATNetManagerForService implements AIController {
 		this.net = NeuralNetFactory.getFactory().createNN(descriptor);
 	}
 
-	public List<NetworkDataSet>  dataSet(ProjectConfig.NormalizedDataDto normalizedDataDto, int inputs, int outputs, int trainEndIndex, int testEndIndex) {
+	public List<NetworkDataSet>  dataSet() {
+
+		int trainEndIndex = this.normalizedDataDto.getTrainEndIndex();
+		int testEndIndex = this.normalizedDataDto.getTestEndIndex();
+
 		List<NetworkDataSet> dSet = null;
+		int inputs = (int) config.getConfigElementByName("INPUT.NODES");
+		int outputs = (int) config.getConfigElementByName("OUTPUT.NODES");
+
 
 
 		dSet = new JsonDataConverter(normalizedDataDto, inputs, outputs, trainEndIndex, testEndIndex).loadData();
 
 
+
 		return (dSet);
 	}
 
-	public Learnable createLearnable(ProjectConfig.NormalizedDataDto normalizedDataDto, ) {
+	public Learnable createLearnable() {
 
 
 
 		// learning env
 		LearningEnvironment le = new LearningEnvironment();
-		this.dataSet(normalizedDataDto, )
-			le.addEnvironmentParameter("TRAINING.SET", dSet);
-		if(init) {
-			dSet = this.dataSet("TEST.SET", config, numOutputs);
-		}
-		le.addEnvironmentParameter("TEST.SET", dSet);
+		// create learnable
+
+
+		List<NetworkDataSet> networkDataSets = this.dataSet();
+
+		le.setTrainDataSet(networkDataSets.get(0));
+		le.setTestDataSet(networkDataSets.get(1));
+
 
 		Learnable learnable = new GALearnable(le);
 		logger.debug("learnableClassName:" + learnable.getClass().getName());
