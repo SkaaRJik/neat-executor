@@ -108,10 +108,12 @@ public class InnovationDatabase {
 			} else {
 				// start with each input to each output, doesn't allow feature selection
 				links = new NEATLinkGene[inputs * outputs] ;
+				int tempIndex = 0;
 				for (i = 0; i < outputs; i++) {
 					for (j = 0; j < inputs; j++) {
-						links[(i * outputs) + j] = this.submitLinkInnovation(nodes[j].id(), nodes[inputs + i].id());
-						links[(i * outputs) + j].setWeight(RandomUtils.nextPlusMinusOne());
+						links[tempIndex] = this.submitLinkInnovation(nodes[j].id(), nodes[inputs + i].id());
+						links[tempIndex].setWeight(RandomUtils.nextPlusMinusOne());
+						tempIndex++;
 					}
 				}
 			}
