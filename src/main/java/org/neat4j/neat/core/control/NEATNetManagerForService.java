@@ -103,11 +103,12 @@ public class NEATNetManagerForService implements AIController {
 		LearningEnvironment le = new LearningEnvironment();
 		// create learnable
 
+		if (this.normalizedDataDto != null) {
+			List<NetworkDataSet> networkDataSets = this.dataSet();
 
-		List<NetworkDataSet> networkDataSets = this.dataSet();
-
-		le.setTrainDataSet(networkDataSets.get(0));
-		le.setTestDataSet(networkDataSets.get(1));
+			le.setTrainDataSet(networkDataSets.get(0));
+			le.setTestDataSet(networkDataSets.get(1));
+		}
 
 
 		Learnable learnable = new GALearnable(le);

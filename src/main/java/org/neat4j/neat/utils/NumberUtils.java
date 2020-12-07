@@ -15,6 +15,13 @@ public class NumberUtils {
         if (o instanceof Number) {
             val = ((Number) o).intValue();
         }
+        if(o instanceof String) {
+            try {
+                val = Integer.parseInt(o.toString());
+            } catch (NumberFormatException ex) {
+
+            }
+        }
         return val;
     }
 

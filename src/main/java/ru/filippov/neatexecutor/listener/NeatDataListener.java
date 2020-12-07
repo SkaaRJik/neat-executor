@@ -2,7 +2,9 @@ package ru.filippov.neatexecutor.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
+import org.neat4j.core.AIConfig;
 import org.neat4j.core.InitialisationFailedException;
+import org.neat4j.neat.manager.prediction.WindowPrediction;
 import org.neat4j.neat.manager.train.NEATTrainingForService;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -23,9 +25,14 @@ public class NeatDataListener{
 
 
         try {
-            NEATTrainingForService neatgaTrainingManager = new NEATTrainingForService(neatConfigEntity);
-            neatgaTrainingManager.run();
+            AIConfig aiConfig = NEATTrainingForService.parseNeatSetting(neatConfigEntity.getNeatSettings());
+            NEATTrainingForService neatGaTrainingManager = new NEATTrainingForService(aiConfig, neatConfigEntity.getNormalizedData());
+            neatGaTrainingManager.run();
+            new WindowPrediction(neatGaTrainingManager.getBestChromosome(), neatConfigEntity).run();
+
         } catch (InitialisationFailedException e) {
+            log.error("[NeatDataListener].consumeNewNeatConfig()", e);
+        } catch (Exception e) {
             log.error("[NeatDataListener].consumeNewNeatConfig()", e);
         }
 

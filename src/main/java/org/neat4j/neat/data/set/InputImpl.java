@@ -23,7 +23,7 @@ public class InputImpl implements NetworkInput {
 	public InputImpl(Double[] input) {
 		this.inputPattern = new double[input.length];
 		for (int i = 0; i < this.inputPattern.length; i++) {
-			this.inputPattern[i] = new Double(input[i]);
+			this.inputPattern[i] = Double.valueOf(input[i]);
 		}
 		//System.arraycopy(input, 0, this.inputPattern, 0, this.inputPattern.length);
 	}

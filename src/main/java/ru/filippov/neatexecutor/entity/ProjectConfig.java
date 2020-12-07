@@ -23,7 +23,7 @@ public class ProjectConfig {
         
         private Map<String, Object> normalizationServiceData;
 
-        private List<Map<String, Object>> columns;
+        private List<ColumnsDto> columns;
         
         private Integer trainEndIndex;
         

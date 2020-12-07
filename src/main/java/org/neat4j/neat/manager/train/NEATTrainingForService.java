@@ -44,7 +44,7 @@ public class NEATTrainingForService implements Runnable {
     protected InnovationDatabase innovationDatabase;
     private double timeSpend;
 
-    public NEATTrainingForService(NeatConfigEntity neatConfigEntity) throws InitialisationFailedException, IOException {
+    public NEATTrainingForService(AIConfig aiConfig,  ProjectConfig.NormalizedDataDto normalizedDataDto) throws InitialisationFailedException, IOException {
 
         Properties prop = new Properties();
 
@@ -53,20 +53,28 @@ public class NEATTrainingForService implements Runnable {
 
         String maxThreadsProperty = prop.getProperty("max-threads");
         if (maxThreadsProperty != null) {
-            numberOfThreads = Integer.parseInt(maxThreadsProperty);
+            this.numberOfThreads = Integer.parseInt(maxThreadsProperty);
         }
 
-
-        this.initialise(neatConfigEntity);
+        this.initialise(aiConfig, normalizedDataDto);
     }
 
+    public NEATTrainingForService(AIConfig aiConfig,  ProjectConfig.NormalizedDataDto normalizedDataDto, int numberOfThreads) throws InitialisationFailedException, IOException {
+
+        if(numberOfThreads <= 0) {
+            throw new InitialisationFailedException("Number of threads must be more or equal then 1");
+        }
+
+        this.numberOfThreads = numberOfThreads;
+        this.initialise(aiConfig, normalizedDataDto);
+    }
 
     @Override
     public void run() {
         this.evolve();
     }
 
-    private AIConfig parseNeatSetting(List<NeatConfigEntity.NeatSetting> neatSettings) {
+    public static AIConfig parseNeatSetting(List<NeatConfigEntity.NeatSetting> neatSettings) {
 
         AIConfig aiConfig = new NEATConfig();
         neatSettings.stream()
@@ -80,16 +88,14 @@ public class NEATTrainingForService implements Runnable {
     }
 
 
-    public void initialise(NeatConfigEntity neatConfigEntity) throws InitialisationFailedException {
+    public void initialise( AIConfig config,  ProjectConfig.NormalizedDataDto normalizedDataDto) throws InitialisationFailedException {
         try {
-            AIConfig aiConfig = this.parseNeatSetting(neatConfigEntity.getNeatSettings());
-
-            this.config = aiConfig;
-            this.random = RandomUtils.setSeed((Long) aiConfig.getConfigElementByName("GENERATOR.SEED"));
-            GADescriptor gaDescriptor = this.createDescriptor(aiConfig);
+            this.config = config;
+            this.random = RandomUtils.setSeed((Long) config.getConfigElementByName("GENERATOR.SEED"));
+            GADescriptor gaDescriptor = this.createDescriptor(config);
             this.geneticAlgorithm = this.createGeneticAlgorithm(gaDescriptor);
-            this.innovationDatabase = new InnovationDatabase(this.random, this.geneticAlgorithm.pluginAllowedActivationFunctions(aiConfig));
-            this.geneticAlgorithm.pluginFitnessFunction(this.createFunction(aiConfig, neatConfigEntity.getNormalizedData()));
+            this.innovationDatabase = new InnovationDatabase(this.random, this.geneticAlgorithm.pluginAllowedActivationFunctions(config));
+            this.geneticAlgorithm.pluginFitnessFunction(this.createFunction(config, normalizedDataDto));
             this.geneticAlgorithm.pluginCrossOver(new NEATCrossover());
             this.geneticAlgorithm.pluginMutator(new NEATMutator(this.random, innovationDatabase));
             this.geneticAlgorithm.pluginParentSelector(new TournamentSelector(this.random));
@@ -137,7 +143,6 @@ public class NEATTrainingForService implements Runnable {
             //status.setValue(((double)i)/epochs);
 
             if(terminate && terminateEnabled) {
-                //status.setValue(1);
                 break;
             }
 
@@ -222,5 +227,8 @@ public class NEATTrainingForService implements Runnable {
         return (function);
     }
 
+    public Chromosome getBestChromosome(){
+        return this.bestEverChromosomes.get(this.bestEverChromosomes.size()-1);
+    }
 
 }

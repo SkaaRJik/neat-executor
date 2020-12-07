@@ -23,8 +23,8 @@ public class NEATConfig implements AIConfig {
 
 
 	//Make copy of config
-	public NEATConfig (NEATConfig originalConfig){
-		this.config = new HashMap(originalConfig.config);
+	public NEATConfig (AIConfig originalConfig){
+		this.config = new HashMap(originalConfig.getMap());
 	}
 
 

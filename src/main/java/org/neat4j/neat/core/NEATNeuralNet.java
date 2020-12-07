@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.neat4j.core.AIConfig;
 import org.neat4j.core.InitialisationFailedException;
 import org.neat4j.neat.core.control.NEATNetManager;
+import org.neat4j.neat.core.control.NEATNetManagerForService;
 import org.neat4j.neat.data.core.NetworkInput;
 import org.neat4j.neat.data.core.NetworkOutputSet;
 import org.neat4j.neat.ga.core.Chromosome;
@@ -274,7 +275,7 @@ public class NEATNeuralNet implements NeuralNet {
 	}
 
 	static protected NeuralNet createNet(AIConfig config) throws InitialisationFailedException {
-		NEATNetManager netManager = new NEATNetManager();
+		NEATNetManagerForService netManager = new NEATNetManagerForService(config, null);
 		netManager.initialise(config, false);
 		return ((NEATNeuralNet)netManager.managedNet());
 	}

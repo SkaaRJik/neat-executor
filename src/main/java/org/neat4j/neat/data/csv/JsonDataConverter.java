@@ -43,15 +43,15 @@ public class JsonDataConverter {
             List<List<Double>> inputColumns = new ArrayList<>(inputsCount);
             List<List<Double>> outputColumns = new ArrayList<>(outputsCount);
             this.dataToParse.getColumns().forEach(stringObjectMap -> {
-                final String columnType = (String) stringObjectMap.get("columnType");
+                final String columnType = stringObjectMap.getColumnType();
                 switch (columnType){
                     case "Input":
-                        inputHeaders.add((String) stringObjectMap.get("columnName"));
-                        inputColumns.add((List<Double>) stringObjectMap.get("data"));
+                        inputHeaders.add(stringObjectMap.getColumnName());
+                        inputColumns.add(stringObjectMap.getData());
                         break;
                     case "Output":
-                        outputHeaders.add((String) stringObjectMap.get("columnName"));
-                        outputColumns.add((List<Double>) stringObjectMap.get("data"));
+                        outputHeaders.add(stringObjectMap.getColumnName());
+                        outputColumns.add(stringObjectMap.getData());
                         break;
                 }
             });
