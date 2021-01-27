@@ -1,9 +1,9 @@
 package org.neat4j.neat.nn.core.functions;
 
 import org.neat4j.neat.nn.core.ActivationFunction;
+import org.neat4j.neat.utils.RandomUtils;
 
 import java.util.List;
-import java.util.Random;
 
 public class ActivationFunctionContainer {
    private  List<ActivationFunctionImpl> inputActivationFunctions;
@@ -34,15 +34,15 @@ public class ActivationFunctionContainer {
         return outputActivationFunctions;
     }
 
-    public ActivationFunction getRandomInputActivationFunction(Random random){
-        return inputActivationFunctions.get(random.nextInt(inputActivationFunctions.size())).newInstance();
+    public ActivationFunction getRandomInputActivationFunction(){
+        return inputActivationFunctions.get(RandomUtils.getRand().nextInt(inputActivationFunctions.size())).newInstance();
     }
 
-    public ActivationFunction getRandomOutputActivationFunction(Random random){
-        return outputActivationFunctions.get(random.nextInt(outputActivationFunctions.size())).newInstance();
+    public ActivationFunction getRandomOutputActivationFunction(){
+        return outputActivationFunctions.get(RandomUtils.getRand().nextInt(outputActivationFunctions.size())).newInstance();
     }
 
-    public ActivationFunction getRandomHiddenActivationFunction(Random random){
-        return hiddenActivationFunctions.get(random.nextInt(hiddenActivationFunctions.size())).newInstance();
+    public ActivationFunction getRandomHiddenActivationFunction(){
+        return hiddenActivationFunctions.get(RandomUtils.getRand().nextInt(hiddenActivationFunctions.size())).newInstance();
     }
 }

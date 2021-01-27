@@ -4,6 +4,8 @@ import org.neat4j.neat.nn.core.ActivationFunction;
 
 public class SinFunction extends ActivationFunctionImpl {
 
+    private static String functionName = "sin(x)";
+
     public SinFunction(double factor) {
         super(factor);
     }
@@ -24,9 +26,10 @@ public class SinFunction extends ActivationFunctionImpl {
     }
 
     public static String getStaticFunctionName(){
-        return "sin(x)";
+        return functionName;
     }
-    public  String getFunctionName(){
-        return "sin(x)";
+
+    public String getFunctionName(){
+        return functionName;
     }
 }

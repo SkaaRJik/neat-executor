@@ -3,54 +3,66 @@ package org.neat4j.neat.manager.prediction;
 import org.apache.log4j.Logger;
 import org.neat4j.core.AIConfig;
 import org.neat4j.core.InitialisationFailedException;
-import org.neat4j.neat.core.NEATChromosome;
 import org.neat4j.neat.core.NEATConfig;
 import org.neat4j.neat.core.NEATNeuralNet;
-import org.neat4j.neat.core.control.NEATNetManagerForService;
-import org.neat4j.neat.data.core.DataKeeper;
 import org.neat4j.neat.data.core.NetworkInput;
 import org.neat4j.neat.data.core.NetworkOutputSet;
 import org.neat4j.neat.data.set.InputImpl;
 import org.neat4j.neat.ga.core.Chromosome;
 import org.neat4j.neat.manager.train.NEATTrainingForService;
-import ru.filippov.neatexecutor.entity.ColumnsDto;
-import ru.filippov.neatexecutor.entity.NeatConfigEntity;
-import ru.filippov.neatexecutor.entity.ProjectConfig;
+import ru.filippov.neatexecutor.entity.*;
+import ru.filippov.neatexecutor.rabbitmq.RabbitMQWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 
-public class WindowPrediction implements Runnable {
+public class WindowPrediction implements Callable<WindowPredictionResult> {
     private final static Logger logger = Logger.getLogger(WindowPrediction.class);
 /*    DataKeeper dataKeeper;
     DataKeeper[] dataForWindow;
     DataKeeper[] dataFromWindows;*/
-    AIConfig baseAiConfig;
-    ProjectConfig.NormalizedDataDto normalizedData;
-    int windowsSize = 0;
-    int totalParams = 0;
-    int yearPrediction = 0;
-    int numOfInputs = 0;
-    int numOfOutputs = 0;
-    NEATTrainingForService[] trainer;
-    Double[][] predictedInputDatas;
-    List<List<Double>> outputData;
-    Double predictionError = 0.0;
-    Chromosome trainedModel;
-    Double timeSpend;
-    Long startTime;
-    NEATNeuralNet neatNeuralNet;
+    private AIConfig baseAiConfig;
+    private ProjectConfig.NormalizedDataDto normalizedData;
+    private int windowsSize = 0;
+    private int totalParams = 0;
+    private int yearPrediction = 100;
+    private int numOfInputs = 0;
+    private int numOfOutputs = 0;
+    private NEATTrainingForService[] trainer;
+    private Double[][] predictedInputData;
+    private Double[][] parsedData;
 
 
-    WindowTrainThread[] inputThreads;
+    private List<List<Double>> outputData;
+    private Double predictionError = 0.0;
+    private Chromosome trainedModel;
+    private Long timeSpend;
+    private Long startTime;
+    private NEATNeuralNet neatNeuralNet;
 
-    public WindowPrediction(Chromosome trainedModel, NeatConfigEntity neatConfigEntity) throws IOException, InitialisationFailedException {
+    private List<Map<String, Object>> factorSigns;
+    private List<Map<String, Object>> targetSigns;
+    private RabbitMQWriter rabbitMQWriter;
+
+    private WindowTrainThread[] inputThreads;
+
+    private Long neatConfigId;
+    private Long projectId;
+    private String brokerStatusKey;
+
+    public WindowPrediction(Long neatConfigId, Long projectId, Chromosome trainedModel, NeatConfigEntity neatConfigEntity, RabbitMQWriter rabbitMQWriter, String brokerStatusKey) throws IOException, InitialisationFailedException {
+        this.neatConfigId = neatConfigId;
+        this.projectId = projectId;
+        this.brokerStatusKey = brokerStatusKey;
         this.windowsSize = neatConfigEntity.getPredictionWindowSize();
-        this.yearPrediction = neatConfigEntity.getPredictionPeriod();
+        //this.yearPrediction = neatConfigEntity.getPredictionPeriod();
         this.trainedModel = trainedModel;
+        this.rabbitMQWriter = rabbitMQWriter;
         this.initialise(neatConfigEntity);
     }
 
@@ -74,7 +86,48 @@ public class WindowPrediction implements Runnable {
         this.baseAiConfig = aiConfig;
         inputThreads = new WindowTrainThread[totalParams];
         this.trainer = new NEATTrainingForService[totalParams];
-        predictedInputDatas = new Double[normalizedData.getColumns().get(0).getData().size()-windowsSize+yearPrediction][totalParams];
+        predictedInputData = new Double[normalizedData.getColumns().get(0).getData().size()-windowsSize+yearPrediction][totalParams];
+
+        this.parsedData = new Double[normalizedData.getColumns().get(0).getData().size()][totalParams];
+
+        int inputIndex = 0;
+        this.factorSigns = new ArrayList<>(normalizedData.getColumns().size());
+        this.targetSigns = new ArrayList<>(normalizedData.getColumns().size());
+        for (int i = 0; i < normalizedData.getColumns().size(); i++) {
+            if("Input".equals(normalizedData.getColumns().get(i).getColumnType())){
+                Map<String, Object> columnInfo = new HashMap<>(5);
+                columnInfo.put("name", normalizedData.getColumns().get(i).getColumnName());
+                columnInfo.put("columnType", normalizedData.getColumns().get(i).getColumnType());
+                this.factorSigns.add(columnInfo);
+                for (int j = 0; j < normalizedData.getColumns().get(i).getData().size(); j++) {
+                    this.parsedData[j][inputIndex] = normalizedData.getColumns().get(i).getData().get(j);
+                }
+                inputIndex++;
+            }
+        }
+
+        for (int i = 0; i < normalizedData.getColumns().size(); i++) {
+            if("Output".equals(normalizedData.getColumns().get(i).getColumnType())){
+                Map<String, Object> columnInfo = new HashMap<>(5);
+                columnInfo.put("name", normalizedData.getColumns().get(i).getColumnName());
+                columnInfo.put("columnType", normalizedData.getColumns().get(i).getColumnType());
+
+
+                Map<String, Object> targetColumnInfo = new HashMap<>(5);
+                targetColumnInfo.put("name", normalizedData.getColumns().get(i).getColumnName());
+                targetColumnInfo.put("data", new ArrayList<Double>(normalizedData.getColumns().size() + yearPrediction));
+
+                this.factorSigns.add(columnInfo);
+                this.targetSigns.add(targetColumnInfo);
+                for (int j = 0; j < normalizedData.getColumns().get(i).getData().size(); j++) {
+                    this.parsedData[j][inputIndex] = normalizedData.getColumns().get(i).getData().get(j);
+                }
+                inputIndex++;
+            }
+        }
+
+
+
         /*if(dataKeeper.getData().size() - windowsSize <= 3) throw new InitialisationFailedException("Размера набора данных недостаточно для заданного размера окна\n" +
                 "Выборка будет состоять из " + (dataKeeper.getData().size() - windowsSize) + " элементов, необходимо хотя бы 4");
         this.dataKeeper = dataKeeper;
@@ -99,31 +152,36 @@ public class WindowPrediction implements Runnable {
     }
 
     public ProjectConfig.NormalizedDataDto prepareDataForWindow(int index){
-        ColumnsDto columnsDto = this.normalizedData.getColumns().get(index);
+
+        Double[] columnData = new Double[this.parsedData.length];
+
+
+        for (int j = 0; j < this.parsedData.length; j++) {
+            columnData[j] = this.parsedData[j][index];
+        }
+
 
         List<ColumnsDto> columns = new ArrayList<>(windowsSize+1);
 
         for (int i = 0; i < windowsSize + 1; i++) {
             columns.add(new ColumnsDto());
-            columns.get(i).setData(new ArrayList<>(columnsDto.getData().size()));
+            columns.get(i).setData(new ArrayList<Double>());
             columns.get(i).setColumnName(String.valueOf(i));
             if(i >= windowsSize) {
-
                 columns.get(i).setColumnType("Output");
             } else {
                 columns.get(i).setColumnType("Input");
             }
         }
 
-        for (int i = 0; i < columnsDto.getData().size() - windowsSize - 1; i++) {
+        for (int i = 0; i < columnData.length - windowsSize; i++) {
 
             int columnIndex = 0;
 
-
             for (int j = i; j < i + windowsSize; j++) {
-                columns.get(columnIndex++).getData().add(columnsDto.getData().get(j));
+                columns.get(columnIndex++).getData().add(columnData[j]);
             }
-            columns.get(columnIndex).getData().add(columnsDto.getData().get(i + windowsSize + 1));
+            columns.get(columnIndex).getData().add(columnData[i + windowsSize]);
         }
 
 
@@ -132,72 +190,44 @@ public class WindowPrediction implements Runnable {
                 (int) (columns.get(0).getData().size() * 0.75),
                 columns.get(0).getData().size()
         );
-
-
-        /*List<List<Double>> windowData = new ArrayList<>(dataKeeper.getData().size()- windowsSize);
-        List<Double> legend = new ArrayList<>(dataKeeper.getData().size()- windowsSize);
-        List<String> headers = new ArrayList<>(windowsSize +1);
-        List<Double> windowRow;
-        for (int i = 0; i < dataKeeper.getData().size()- windowsSize; i++) {
-            windowRow = new ArrayList<>(windowsSize +1);
-            for (int j = i; j <= i+ windowsSize; j++) {
-                if(i == 0) {
-                    headers.add(String.valueOf(j+1));
-                }
-                windowRow.add(dataKeeper.getData().get(j).get(index));
-            }
-
-            legend.add(dataKeeper.getLegend() == null ? Double.valueOf(i+1) : dataKeeper.getLegend().get(i+windowsSize));
-            windowData.add(windowRow);
-        }
-
-        DataKeeper windowDataKeeper = new DataKeeper(windowData, dataKeeper.getDataScaler());
-        windowDataKeeper.setLegend(legend);
-        windowDataKeeper.setInputs(windowsSize);
-        windowDataKeeper.setOutputs(1);
-        windowDataKeeper.setHeaders(headers);
-        windowDataKeeper.setLegendHeader(dataKeeper.getLegendHeader() == null ? "Год" : dataKeeper.getHeaders().get(index));
-        windowDataKeeper.calculateIndex(0.75);*/
     }
 
     @Override
-    public void run() {
+    public WindowPredictionResult call() throws ExecutionException, InterruptedException {
+
+        rabbitMQWriter.sendMessage(this.brokerStatusKey,
+                new ExperimentStatusDto(this.projectId, "PREDICT_FACTOR_SIGNS"));
         startTime = System.currentTimeMillis();
-
-        train(0);
-
-       /* Thread[] threads = new Thread[this.totalParams];
-        for (int i = 0; i < this.totalParams; i++) {
-            threads[i] = train(i);
-        }
-        try {
-            for (int i = 0; i < this.totalParams; i++) {
-                    threads[i].join();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        ExecutorService executor = Executors.newCachedThreadPool();
+        List<Future<?>> futureList = new ArrayList<>();
+        for(int i = 0; i < this.totalParams; i++){
+            //сабмитим Callable таски, которые будут
+            //выполнены пулом потоков
+            Future<?> future = executor.submit(train(i));
+            //добавляя Future в список,
+            //мы сможем получить результат выполнения
+            futureList.add(future);
         }
 
+        for(Future<?> fut : futureList){
+            fut.get();
+        }
+
+        executor.shutdown();
+        rabbitMQWriter.sendMessage(this.brokerStatusKey, new ExperimentStatusDto(this.projectId, "PREDICTION"));
+        WindowPredictionResult predict = null;
         try {
-            predict(neatNeuralNet);
+            predict = predict(neatNeuralNet);
         } catch (InitialisationFailedException e) {
-            e.printStackTrace();
+            logger.error("WindowPrediction.call", e);
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        this.outputData.forEach(doubles -> {
-            doubles.forEach(aDouble -> stringBuilder.append(aDouble + " "));
-            stringBuilder.delete(stringBuilder.length()-1, stringBuilder.length());
-            stringBuilder.append("\n");
-        });
-        System.out.println(stringBuilder.toString());*/
 
-
+        return predict;
     }
 
-    public Thread train(int index){
+    public Runnable train(int index){
         AIConfig aiConfig = new NEATConfig(this.baseAiConfig);
-        Thread thread = new Thread(() -> {
-
+        Runnable runnable = () -> {
             ProjectConfig.NormalizedDataDto normalizedDataDto = prepareDataForWindow(index);
             try {
                 trainer[index] = new NEATTrainingForService(aiConfig, normalizedDataDto, 1);
@@ -205,22 +235,25 @@ public class WindowPrediction implements Runnable {
                 inputThreads[index].startTraining();
                 predictFactorSign(index, aiConfig);
             } catch (InitialisationFailedException e) {
-                e.printStackTrace();
+                logger.error(String.format("WindowPrediction.train [index]=%d", index), e);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(String.format("WindowPrediction.train [index]=%d", index), e);
+            } catch (InterruptedException e) {
+                logger.error(String.format("WindowPrediction.train [index]=%d", index), e);
+            } catch (ExecutionException e) {
+                logger.error(String.format("WindowPrediction.train [index]=%d", index), e);
             }
-        });
-        thread.start();
-        return thread;
+        };
+        return runnable;
     }
 
     private void predictFactorSign(int index, AIConfig config) throws InitialisationFailedException {
         //List<Chromosome> bestEverChromosomes = ;
         Chromosome bestChromosome = trainer[index].getBestChromosome();
         List<Double> inputs = new ArrayList<>(windowsSize+yearPrediction);
-        List<Double> data = this.normalizedData.getColumns().get(index).getData();
-        for (int i = data.size()-windowsSize; i < data.size(); i++) {
-            inputs.add(data.get(i));
+
+        for (int i = this.parsedData.length-windowsSize; i < this.parsedData.length; i++) {
+            inputs.add(this.parsedData[i][index]);
         }
 
         NEATNeuralNet neatNeuralNet = NEATNeuralNet.createNet(config, bestChromosome);
@@ -228,9 +261,10 @@ public class WindowPrediction implements Runnable {
         NetworkInput input = null;
         NetworkOutputSet execute = null;
         Double[] inputTemp  = new Double[windowsSize];
-
+        List<Double> columnValues = new ArrayList<>(bestChromosome.getOutputValues().size() + yearPrediction);
         for (int i = 0 ; i < bestChromosome.getOutputValues().size() ; i++) {
-            predictedInputDatas[i][index] = bestChromosome.getOutputValues().get(i).get(0);
+            predictedInputData[i][index] = bestChromosome.getOutputValues().get(i).get(0);
+            columnValues.add( predictedInputData[i][index]);
         }
 
         for (int i = 0; i < yearPrediction; i++) {
@@ -240,8 +274,13 @@ public class WindowPrediction implements Runnable {
             input = new InputImpl(inputTemp);
             execute = neatNeuralNet.execute(input);
             inputs.add(execute.nextOutput().getNetOutputs().get(0));
-            predictedInputDatas[bestChromosome.getOutputValues().size()+i][index] = execute.nextOutput().getNetOutputs().get(0);
+            predictedInputData[bestChromosome.getOutputValues().size()+i][index] = execute.nextOutput().getNetOutputs().get(0);
+            columnValues.add( predictedInputData[bestChromosome.getOutputValues().size()+i][index] );
         }
+
+        this.factorSigns.get(index).put("data", columnValues);
+        this.factorSigns.get(index).put("trainError", trainer[index].getBestChromosome().getTrainError());
+        this.factorSigns.get(index).put("testError", trainer[index].getBestChromosome().getValidationError());
 
 
     }
@@ -249,9 +288,9 @@ public class WindowPrediction implements Runnable {
 
 
     public List<Double> getPredictedInputs(int index){
-        List<Double> list = new ArrayList<>(predictedInputDatas.length);
-        for (int j = 0; j < predictedInputDatas.length; j++) {
-            list.add(predictedInputDatas[j][index]);
+        List<Double> list = new ArrayList<>(predictedInputData.length);
+        for (int j = 0; j < predictedInputData.length; j++) {
+            list.add(predictedInputData[j][index]);
         }
         return list;
     }
@@ -274,12 +313,12 @@ public class WindowPrediction implements Runnable {
 
     }*/
 
-    private void predict(NEATNeuralNet neatNeuralNet) throws InitialisationFailedException {
+    private WindowPredictionResult predict(NEATNeuralNet neatNeuralNet) throws InitialisationFailedException {
 
 
-        for (int i = 0; i < predictedInputDatas.length; i++) {
-            for (int j = 0; j < predictedInputDatas[i].length; j++) {
-                if(predictedInputDatas[i][j] == null){
+        for (int i = 0; i < predictedInputData.length; i++) {
+            for (int j = 0; j < predictedInputData[i].length; j++) {
+                if(predictedInputData[i][j] == null){
                     throw new InitialisationFailedException("WindowPrediction model should be trained firstly");
                 }
             }
@@ -287,45 +326,30 @@ public class WindowPrediction implements Runnable {
 
         NetworkInput input = null;
         NetworkOutputSet os = null;
-        this.outputData = new ArrayList<>(predictedInputDatas.length + yearPrediction + yearPrediction);
+        this.outputData = new ArrayList<>(predictedInputData.length);
 
         double error = 0;
         int n = 0;
         List<Double> netOutputs = null;
 
-        Double[][] dataKeeper = new Double[predictedInputDatas.length + yearPrediction + yearPrediction][this.totalParams];
-
-        for (int i = 0; i < normalizedData.getColumns().size(); i++) {
-            for (int j = 0; j < normalizedData.getColumns().get(i).getData().size(); j++) {
-                dataKeeper[j][i] = normalizedData.getColumns().get(i).getData().get(j);
-            }
-        }
-
+        //Заполняем null значениями период [0-windowSize], так как этот диапазон выпадает из прогнозирования из-за метода окон
         for (int i = 0; i < windowsSize; i++) {
-
-
-
-            input = new InputImpl(dataKeeper[i], this.numOfInputs);
-            os = neatNeuralNet.execute(input);
-            netOutputs = os.nextOutput().getNetOutputs();
-            this.outputData.add(netOutputs);
-            for (int j = 0; j < netOutputs.size(); j++) {
-                double diff = netOutputs.get(j) - dataKeeper[i][numOfInputs+j];
-                error += diff * diff;
-                n++;
+            ArrayList<Double> nullOutputs = new ArrayList<>(this.numOfOutputs);
+            for (int j = 0; j < this.numOfOutputs; j++) {
+                nullOutputs.add(null);
             }
+            this.outputData.add(nullOutputs);
         }
 
         //0.038117398190327154
-        for (int i = 0; i < predictedInputDatas.length; i++) {
-            input = new InputImpl(predictedInputDatas[i]);
-            input = new InputImpl(predictedInputDatas[i], this.numOfInputs);
+        for (int i = 0; i < this.parsedData.length - windowsSize; i++) {
+            input = new InputImpl(predictedInputData[i], this.numOfInputs);
             os = neatNeuralNet.execute(input);
             netOutputs = os.nextOutput().getNetOutputs();
             this.outputData.add(netOutputs);
-            if(i+windowsSize <  normalizedData.getColumns().size()) {
+            if(i+windowsSize <  this.parsedData.length) {
                 for (int j = 0; j < netOutputs.size(); j++) {
-                    double diff = netOutputs.get(j) - dataKeeper[i + windowsSize][numOfInputs+j];
+                    double diff = netOutputs.get(j) - this.parsedData[i + windowsSize][numOfInputs+j];
                     error += diff * diff;
                     n++;
                 }
@@ -336,10 +360,31 @@ public class WindowPrediction implements Runnable {
 
 
         for (int i = 0; i < yearPrediction; i++) {
-            input = new InputImpl(predictedInputDatas[i]);
+            input = new InputImpl(predictedInputData[i]);
             os = neatNeuralNet.execute(input);
-            this.outputData.add(os.nextOutput().getNetOutputs());
+            netOutputs = os.nextOutput().getNetOutputs();
+            this.outputData.add(netOutputs);
         }
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        this.outputData.stream().forEach(doubles -> {
+            doubles.forEach(aDouble -> {
+                stringBuilder.append(aDouble);
+                stringBuilder.append(" ");
+            });
+            stringBuilder.append("\n");
+        });
+
+        System.out.println(stringBuilder.toString());
+
+        long timeSpent = System.currentTimeMillis() - this.startTime;
+        for (List<Double> outs: this.outputData) {
+            for (int i = 0; i < outs.size(); i++) {
+                ((List<Double>)this.targetSigns.get(i).get("data")).add(outs.get(i));
+            }
+        }
+        return new WindowPredictionResult(timeSpent, this.predictionError, this.factorSigns, this.targetSigns);
 
     }
 

@@ -18,17 +18,12 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NeatConfigEntity {
 
-    private Long id;
+    private Long neatConfigId;
+    private Long projectId;
     private ProjectConfig.NormalizedDataDto normalizedData;
     private List<NeatSetting> neatSettings;
     private Short predictionWindowSize;
     private Short predictionPeriod;
-
-    public String toJson() throws JsonProcessingException {
-        return new ObjectMapper().writeValueAsString(this);
-    }
-
-
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class NeatSetting {

@@ -1,5 +1,6 @@
 package org.neat4j.neat.manager.train;
 
+import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neat4j.core.AIConfig;
@@ -24,25 +25,31 @@ import org.neat4j.neat.utils.NumberUtils;
 import org.neat4j.neat.utils.RandomUtils;
 import ru.filippov.neatexecutor.entity.NeatConfigEntity;
 import ru.filippov.neatexecutor.entity.ProjectConfig;
+import ru.filippov.neatexecutor.entity.TrainResult;
+import ru.filippov.neatexecutor.rabbitmq.RabbitMQWriter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class NEATTrainingForService implements Runnable {
     private static final Logger logger = LogManager.getLogger(NEATTrainingForService.class);
 
-
+    private RabbitMQWriter rabbitMQWriter;
     private int numberOfThreads = 2;
     private AIConfig config;
     private List<Chromosome> bestEverChromosomes;
 
     protected GeneticAlgorithm geneticAlgorithm;
-    protected Random random;
     protected InnovationDatabase innovationDatabase;
-    private double timeSpend;
+    protected ExecutorService executorService;
+
+    protected Long configId;
+
+    private long timeSpend;
+
 
     public NEATTrainingForService(AIConfig aiConfig,  ProjectConfig.NormalizedDataDto normalizedDataDto) throws InitialisationFailedException, IOException {
 
@@ -60,7 +67,6 @@ public class NEATTrainingForService implements Runnable {
     }
 
     public NEATTrainingForService(AIConfig aiConfig,  ProjectConfig.NormalizedDataDto normalizedDataDto, int numberOfThreads) throws InitialisationFailedException, IOException {
-
         if(numberOfThreads <= 0) {
             throw new InitialisationFailedException("Number of threads must be more or equal then 1");
         }
@@ -69,6 +75,7 @@ public class NEATTrainingForService implements Runnable {
         this.initialise(aiConfig, normalizedDataDto);
     }
 
+    @SneakyThrows
     @Override
     public void run() {
         this.evolve();
@@ -91,14 +98,14 @@ public class NEATTrainingForService implements Runnable {
     public void initialise( AIConfig config,  ProjectConfig.NormalizedDataDto normalizedDataDto) throws InitialisationFailedException {
         try {
             this.config = config;
-            this.random = RandomUtils.setSeed((Long) config.getConfigElementByName("GENERATOR.SEED"));
+            RandomUtils.setSeed((Long) config.getConfigElementByName("GENERATOR.SEED"));
             GADescriptor gaDescriptor = this.createDescriptor(config);
             this.geneticAlgorithm = this.createGeneticAlgorithm(gaDescriptor);
-            this.innovationDatabase = new InnovationDatabase(this.random, this.geneticAlgorithm.pluginAllowedActivationFunctions(config));
+            this.innovationDatabase = new InnovationDatabase(this.geneticAlgorithm.pluginAllowedActivationFunctions(config));
             this.geneticAlgorithm.pluginFitnessFunction(this.createFunction(config, normalizedDataDto));
             this.geneticAlgorithm.pluginCrossOver(new NEATCrossover());
-            this.geneticAlgorithm.pluginMutator(new NEATMutator(this.random, innovationDatabase));
-            this.geneticAlgorithm.pluginParentSelector(new TournamentSelector(this.random));
+            this.geneticAlgorithm.pluginMutator(new NEATMutator(innovationDatabase));
+            this.geneticAlgorithm.pluginParentSelector(new TournamentSelector());
             this.geneticAlgorithm.createPopulation(innovationDatabase);
         } catch (InvalidFitnessFunction e) {
             logger.error("[NEATTrainingForService].initialise", e);
@@ -110,11 +117,12 @@ public class NEATTrainingForService implements Runnable {
     }
 
     private GeneticAlgorithm createGeneticAlgorithm(GADescriptor gaDescriptor) {
-        GeneticAlgorithm ga = new NEATGeneticAlgorithm((NEATGADescriptor) gaDescriptor, this.random, this.numberOfThreads);
+        this.executorService = Executors.newCachedThreadPool();
+        GeneticAlgorithm ga = new NEATGeneticAlgorithm((NEATGADescriptor) gaDescriptor, this.numberOfThreads, executorService);
         return ga;
     }
 
-    public void evolve() {
+    public void evolve() throws ExecutionException, InterruptedException {
 
         int epochs = NumberUtils.asInt(config.getConfigElementByName("NUMBER.EPOCHS"));
         this.bestEverChromosomes = new ArrayList<>(epochs);
@@ -131,7 +139,13 @@ public class NEATTrainingForService implements Runnable {
                 break;
             }
             logger.debug("Running Epoch[" + i + "]\r");
-            this.geneticAlgorithm.runEpoch();
+            try{
+                this.geneticAlgorithm.runEpoch();
+            } catch (ExecutionException e) {
+                logger.error(String.format("[epoch] = %d", i));
+                throw e;
+            }
+
             this.saveBest();
 
             if ((this.geneticAlgorithm.discoverdBestMember().fitness() >= terminateVal && !nOrder)
@@ -147,9 +161,11 @@ public class NEATTrainingForService implements Runnable {
             }
 
         }
-        this.timeSpend = (double)(System.currentTimeMillis() - startTime) / 1000;
+        this.timeSpend = System.currentTimeMillis() - startTime;
         Chromosome chromosome = bestEverChromosomes.get(bestEverChromosomes.size() - 1);
-        logger.info(String.format("trainError: [ %f ], testError: [ %f ], timeSpend: [ %f ]", chromosome.getTrainError(), chromosome.getValidationError(), timeSpend));
+        this.executorService.shutdown();
+
+        logger.info(String.format("trainError: [ %f ], testError: [ %f ], timeSpend: [ %d ]", chromosome.getTrainError(), chromosome.getValidationError(), timeSpend));
         logger.debug("Innovation Database Stats - Hits:" + innovationDatabase.totalHits + " - totalMisses:" + innovationDatabase.totalMisses);
     }
 
@@ -231,4 +247,17 @@ public class NEATTrainingForService implements Runnable {
         return this.bestEverChromosomes.get(this.bestEverChromosomes.size()-1);
     }
 
+    public long getTimeSpend() {
+        return timeSpend;
+    }
+
+    public TrainResult getTrainResults() {
+        return new TrainResult(this.getBestChromosome().getTrainError(),
+                this.getBestChromosome().getValidationError(),
+                this.timeSpend);
+    }
+
+    public void setConfigId(Long configId) {
+        this.configId = configId;
+    }
 }

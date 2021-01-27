@@ -14,7 +14,6 @@ import org.neat4j.neat.utils.RandomUtils;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.Set;
 
 /**
@@ -24,7 +23,6 @@ import java.util.Set;
  *
  */
 public class InnovationDatabase {
-	private final Random ran;
 	private HashMap innovations;
 	private int innovationId = 1;
 	private int neuronId = 1;
@@ -36,8 +34,7 @@ public class InnovationDatabase {
 		return activationFunctionContainer;
 	}
 
-	public InnovationDatabase(Random ran, ActivationFunctionContainer activationFunctionContainer){
-		this.ran = ran;
+	public InnovationDatabase(ActivationFunctionContainer activationFunctionContainer){
 		innovationId = 1;
 		neuronId = 1;
 		totalHits = 0;
@@ -102,7 +99,7 @@ public class InnovationDatabase {
 				// start with one link to each output, allows feature selection
 				links = new NEATLinkGene[outputs] ;
 				for (i = 0; i < outputs; i++) {
-					links[i] = this.submitLinkInnovation(nodes[this.ran.nextInt(inputs)].id(), nodes[inputs + i].id());
+					links[i] = this.submitLinkInnovation(nodes[RandomUtils.getRand().nextInt(inputs)].id(), nodes[inputs + i].id());
 					links[i].setWeight(RandomUtils.nextPlusMinusOne());
 				}
 			} else {
@@ -157,11 +154,11 @@ public class InnovationDatabase {
 		ActivationFunction activationFunction = null;
 
 		if (type == NEATNodeGene.TYPE.HIDDEN){
-			activationFunction = activationFunctionContainer.getRandomHiddenActivationFunction(ran);
+			activationFunction = activationFunctionContainer.getRandomHiddenActivationFunction();
 		} else if (type == NEATNodeGene.TYPE.INPUT) {
-			activationFunction = activationFunctionContainer.getRandomInputActivationFunction(ran);
+			activationFunction = activationFunctionContainer.getRandomInputActivationFunction();
 		} else if(type == NEATNodeGene.TYPE.OUTPUT) {
-			activationFunction = activationFunctionContainer.getRandomOutputActivationFunction(ran);
+			activationFunction = activationFunctionContainer.getRandomOutputActivationFunction();
 		}
 
 		NEATNodeGene nodeGene = new NEATNodeGene(innovationNumber, ((NEATNodeInnovation)databaseEntry).getNodeId(), RandomUtils.nextDouble(), type, "", RandomUtils.nextPlusMinusOne(), activationFunction);
@@ -219,7 +216,7 @@ public class InnovationDatabase {
 			totalHits++;
 		}
 
-		gene = new NEATNodeGene(databaseEntry.innovationId(), ((NEATNodeInnovation)databaseEntry).getNodeId(), RandomUtils.nextDouble(), NEATNodeGene.TYPE.HIDDEN, "", RandomUtils.nextPlusMinusOne(), activationFunctionContainer.getRandomHiddenActivationFunction(ran));
+		gene = new NEATNodeGene(databaseEntry.innovationId(), ((NEATNodeInnovation)databaseEntry).getNodeId(), RandomUtils.nextDouble(), NEATNodeGene.TYPE.HIDDEN, "", RandomUtils.nextPlusMinusOne(), activationFunctionContainer.getRandomHiddenActivationFunction());
 
 		return (gene);
 	}

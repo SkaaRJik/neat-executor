@@ -9,6 +9,7 @@ import org.neat4j.neat.core.InnovationDatabase;
 import org.neat4j.neat.nn.core.functions.ActivationFunctionContainer;
 
 import java.io.Serializable;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author MSimmerson
@@ -17,7 +18,7 @@ import java.io.Serializable;
 public interface GeneticAlgorithm extends Serializable {
 	public GADescriptor getDescriptor();
 	public void createPopulation(InnovationDatabase innovationDatabase);
-	public void runEpoch();
+	public void runEpoch() throws ExecutionException, InterruptedException;
 	public Chromosome discoverdBestMember();
 	public void pluginMutator(Mutator mut);
 	public void pluginFitnessFunction(FitnessFunction func);

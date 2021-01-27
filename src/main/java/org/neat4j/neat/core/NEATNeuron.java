@@ -6,6 +6,9 @@
  */
 package org.neat4j.neat.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.neat4j.neat.nn.core.ActivationFunction;
 import org.neat4j.neat.nn.core.Neuron;
 import org.neat4j.neat.nn.core.Synapse;
@@ -18,6 +21,9 @@ import java.util.ArrayList;
  * Specific NEAT neuron
  */
 public class NEATNeuron implements Neuron {
+	@JsonIgnore
+	private static final Logger logger = LogManager.getLogger(NEATNeuron.class);
+
 	private double lastActivation;
 	private double bias;
 	private double[] weights;
@@ -25,9 +31,12 @@ public class NEATNeuron implements Neuron {
 	private int id;
 	private NEATNodeGene.TYPE type;
 	private int depth;
-	String label;
+	private String label;
+	@JsonIgnore
 	private ArrayList<NEATNeuron> sourceNeurons;
+	@JsonIgnore
 	private ArrayList<Synapse> incomingSynapses;
+	@JsonIgnore
 	private ArrayList<Synapse> outSynapses;
 
 	public NEATNeuron(ActivationFunction function, int id, NEATNodeGene.TYPE type, String label) {
@@ -71,15 +80,16 @@ public class NEATNeuron implements Neuron {
 		double weight;
 		double input;
 		Synapse synapse;
-		Object[] incoming = this.incomingSynapses.toArray();
 		// acting as a bias neuron
 		this.lastActivation = -1;
+		try{
+
 
 		if (this.type != NEATNodeGene.TYPE.INPUT) {
 			if (nInputs.length > 0) {
 				for (i = 0; i < nInputs.length; i++) {
 					input = nInputs[i];
-					synapse = (Synapse)incoming[i];
+					synapse = this.incomingSynapses.get(i);
 					if (synapse.isEnabled()) {
 						weight = synapse.getWeight();
 						neuronIp += (input * weight);
@@ -91,6 +101,10 @@ public class NEATNeuron implements Neuron {
 		} else {
 			//neuronIp = nInputs[0];
 			this.lastActivation = nInputs[0];
+		}
+		} catch (IndexOutOfBoundsException e) {
+			logger.error(this.incomingSynapses);
+			throw e;
 		}
 		
 		return (this.lastActivation);
@@ -130,10 +144,6 @@ public class NEATNeuron implements Neuron {
 		return this.id;
 	}
 
-	public int id() {
-		return (this.id);
-	}
-	
 	public NEATNodeGene.TYPE neuronType() {
 		return (this.type);
 	}
@@ -176,5 +186,77 @@ public class NEATNeuron implements Neuron {
 
 	public void addOutSynapse(Synapse synapse){
 		this.outSynapses.add(synapse);
+	}
+
+	public static Logger getLogger() {
+		return logger;
+	}
+
+	public double getLastActivation() {
+		return lastActivation;
+	}
+
+	public void setLastActivation(double lastActivation) {
+		this.lastActivation = lastActivation;
+	}
+
+	public double getBias() {
+		return bias;
+	}
+
+	public void setBias(double bias) {
+		this.bias = bias;
+	}
+
+	public double[] getWeights() {
+		return weights;
+	}
+
+	public void setWeights(double[] weights) {
+		this.weights = weights;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public NEATNodeGene.TYPE getType() {
+		return type;
+	}
+
+	public void setType(NEATNodeGene.TYPE type) {
+		this.type = type;
+	}
+
+	public int getDepth() {
+		return depth;
+	}
+
+	public void setDepth(int depth) {
+		this.depth = depth;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	public ArrayList<NEATNeuron> getSourceNeurons() {
+		return sourceNeurons;
+	}
+
+	public void setSourceNeurons(ArrayList<NEATNeuron> sourceNeurons) {
+		this.sourceNeurons = sourceNeurons;
+	}
+
+	public ArrayList<Synapse> getIncomingSynapses() {
+		return incomingSynapses;
+	}
+
+	public void setIncomingSynapses(ArrayList<Synapse> incomingSynapses) {
+		this.incomingSynapses = incomingSynapses;
+	}
+
+	public void setOutSynapses(ArrayList<Synapse> outSynapses) {
+		this.outSynapses = outSynapses;
 	}
 }

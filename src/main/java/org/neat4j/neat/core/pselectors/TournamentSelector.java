@@ -1,10 +1,10 @@
 package org.neat4j.neat.core.pselectors;
 
 import org.neat4j.neat.ga.core.*;
+import org.neat4j.neat.utils.RandomUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 /**
  * @author MSimmerson
@@ -14,10 +14,7 @@ import java.util.Random;
 public class TournamentSelector implements ParentSelector {
 	private int numElitist;
 	private boolean naturalOrder = false;
-	private final Random rand;
-
-	public TournamentSelector(Random rand) {
-		this.rand = rand;
+	public TournamentSelector() {
 	}
 
 
@@ -46,8 +43,8 @@ public class TournamentSelector implements ParentSelector {
 					pOne = genoTypes[0];
 					pTwo = genoTypes[0];
 				} else {
-					pOne = genoTypes[this.rand.nextInt(genoTypes.length - 1)];
-					pTwo = genoTypes[this.rand.nextInt(genoTypes.length - 1)];
+					pOne = genoTypes[RandomUtils.getRand().nextInt(genoTypes.length - 1)];
+					pTwo = genoTypes[RandomUtils.getRand().nextInt(genoTypes.length - 1)];
 				}
 				set.add(this.performATournament(pOne, pTwo));
 			}

@@ -9,7 +9,6 @@ package org.neat4j.neat.ga.core;
 import org.neat4j.neat.core.*;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * @author MSimmerson
@@ -28,14 +27,12 @@ public abstract class Specie implements Comparable {
 	private int specieId = -1;	
 	private double bestAvFitness = 0;
 	private double survivalThreshold = 0.3;
-	protected final Random random;
 
-	public Specie(double threshold, int id, Random random) {
+	public Specie(double threshold, int id) {
 		this.specieMembers = new ArrayList();
 		this.threshold = threshold;
 		//this.bestFitness = 0;
 		this.specieId = id;
-		this.random = random;
 	}
 	
 	public int id() {
@@ -256,7 +253,4 @@ public abstract class Specie implements Comparable {
 		this.survivalThreshold = survivalThreshold;
 	}
 
-	public Random getRandom() {
-		return random;
-	}
 }

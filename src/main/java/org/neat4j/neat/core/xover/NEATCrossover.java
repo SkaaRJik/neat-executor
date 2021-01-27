@@ -13,9 +13,9 @@ import org.neat4j.neat.core.NEATGene;
 import org.neat4j.neat.ga.core.Chromosome;
 import org.neat4j.neat.ga.core.ChromosomeSet;
 import org.neat4j.neat.ga.core.CrossOver;
+import org.neat4j.neat.utils.RandomUtils;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * @author MSimmerson
@@ -32,7 +32,7 @@ public class NEATCrossover implements CrossOver {
 		this.pXOver = prob;
 	}
 
-	public ChromosomeSet crossOver(ChromosomeSet parents, Random rand) {
+	public ChromosomeSet crossOver(ChromosomeSet parents) {
 		ChromosomeSet childSet = new ChromosomeSet(false);
 		ArrayList childGenes = new ArrayList();
 		Chromosome pOne = null;
@@ -80,8 +80,8 @@ public class NEATCrossover implements CrossOver {
 			} else if (bestIdx >= bestGenes.length) {
 				childBorn = true;
 			} else if (bestGenes[bestIdx].getInnovationNumber() == worstGenes[worstIdx].getInnovationNumber()) {
-				// innovations are the same, pick one gene at random
-				childGenes.add(rand.nextBoolean() ? bestGenes[bestIdx] : worstGenes[worstIdx]);
+				// innovations are the same, pick one gene at RandomUtils.getRand()om
+				childGenes.add(RandomUtils.getRand().nextBoolean() ? bestGenes[bestIdx] : worstGenes[worstIdx]);
 				bestIdx++;
 				worstIdx++;
 			} else if (bestGenes[bestIdx].getInnovationNumber() > worstGenes[worstIdx].getInnovationNumber()){

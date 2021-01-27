@@ -12,7 +12,6 @@ import org.neat4j.neat.ga.core.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 /**
  * @author MSimmerson
@@ -32,8 +31,8 @@ public class NEATSpecie extends Specie {
 	private double fitnessMultiplier = 1;
 
 	
-	public NEATSpecie(double threshold, double excessCoeff, double disjointCoeff, double weightCoeff, int id, Random random) {
-		super(threshold, id, random);
+	public NEATSpecie(double threshold, double excessCoeff, double disjointCoeff, double weightCoeff, int id) {
+		super(threshold, id);
 		this.disjointCoeff = disjointCoeff;
 		this.excessCoeff = excessCoeff;
 		this.weightCoeff = weightCoeff;
@@ -138,7 +137,7 @@ public class NEATSpecie extends Specie {
 		try {
 			for (i = 1; i < offspring.length; i++) { 
 				parents = selector.selectParents(matableMembers, false);
-				child = xOver.crossOver(this.cloneParents(parents), super.random);
+				child = xOver.crossOver(this.cloneParents(parents));
 				offspring[i] = mut.mutate(child.nextChromosome());
 				parents = null;
 			}

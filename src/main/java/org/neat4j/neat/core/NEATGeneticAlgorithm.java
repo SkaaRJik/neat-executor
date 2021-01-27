@@ -20,7 +20,10 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * 
@@ -41,21 +44,19 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	private Species specieList;
 	private int specieIdIdx;
 	private int eleCount = 0;
-	private final Random random;
 	private final int numberOfThreads;
 	private int offsetOfIndex;
-	private final Thread[] threads;
+	private final ExecutorService executorService;
 
 	/**
 	 * Creates a NEAT GA with behaviour defined by the getDescriptor
 	 * @param descriptor
 	 */
-	public NEATGeneticAlgorithm(NEATGADescriptor descriptor, Random random, int numberOfThreads) {
+	public NEATGeneticAlgorithm(NEATGADescriptor descriptor, int numberOfThreads, ExecutorService executorService) {
 		this.descriptor = descriptor;
 		this.specieList = new Species();
-		this.random = random;
 		this.numberOfThreads = numberOfThreads;
-		this.threads = new Thread[numberOfThreads];
+		this.executorService = executorService;
 		this.offsetOfIndex = descriptor.gaPopulationSize() / numberOfThreads;
 		specieIdIdx = 1;
 	}
@@ -63,27 +64,23 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	/**
 	 * Runs an evaluation and evolution cycle
 	 */
-	public void runEpoch() {
+	public void runEpoch() throws ExecutionException, InterruptedException {
 		Chromosome[] currentGen = this.pop.genoTypes();
-
+		List<Future<?>> futures = new ArrayList<>(this.numberOfThreads);
 		this.setChromosomeNO(currentGen);
 		logger.debug("Evaluating pop");
 		for (int i = 0; i < this.numberOfThreads; i++) {
 			int finalI = i;
-			threads[i] = new Thread(()->{
-				calculateFitness(currentGen, (finalI)*offsetOfIndex, (finalI)*offsetOfIndex+offsetOfIndex);
-			});
-			threads[i].run();
+
+			Future<?> submit = this.executorService.submit(() ->
+					calculateFitness(currentGen, (finalI) * offsetOfIndex, (finalI) * offsetOfIndex + offsetOfIndex));
+			futures.add(submit);
 		}
 
-		/*this.calculateFitness(currentGen, 0 , offsetOfIndex);*/
-		for (int i = 0; i < numberOfThreads; i++) {
-			try {
-				threads[i].join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		for (Future<?> future : futures){
+			future.get();
 		}
+
 
 		this.runEvolutionCycle(currentGen);
 
@@ -114,7 +111,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	public void createPopulation(InnovationDatabase innovationDatabase) {
 		int popSize = this.descriptor.gaPopulationSize();
 		int initialChromoSize = this.func.requiredChromosomeSize() + this.descriptor.getExtraFeatureCount();
-		this.pop = new NEATPopulation(popSize, initialChromoSize, this.descriptor.getInputNodes(), this.descriptor.getOutputNodes(), this.descriptor.featureSelectionEnabled(), this.descriptor.getExtraFeatureCount(), this.random);
+		this.pop = new NEATPopulation(popSize, initialChromoSize, this.descriptor.getInputNodes(), this.descriptor.getOutputNodes(), this.descriptor.featureSelectionEnabled(), this.descriptor.getExtraFeatureCount());
 		this.pop.createPopulation(innovationDatabase);
 	}
 
@@ -143,10 +140,9 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	}
 
 	private void calculateFitness(Chromosome[] genoTypes, int start, int end) {
-		int i;
 		double eval;
 		
-		for (i = start; i < end; i++) {
+		for (int i = start; i < end; i++) {
 			eval = this.func.evaluate(genoTypes[i]);
 			genoTypes[i].updateFitness(eval);			
 		}
@@ -325,7 +321,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		double weightCoeff = this.descriptor.getWeightCoeff();
 		double threshold = this.descriptor.getThreshold();
 		
-		NEATSpecie specie = new NEATSpecie(threshold, excessCoeff, disjointCoeff, weightCoeff, specieIdIdx++, random);
+		NEATSpecie specie = new NEATSpecie(threshold, excessCoeff, disjointCoeff, weightCoeff, specieIdIdx++);
 		specie.setMaxFitnessAge(this.descriptor.getMaxSpecieAge());
 		specie.setAgePenalty(this.descriptor.getAgePenalty());
 		specie.setAgeThreshold(this.descriptor.getSpecieAgeThreshold());

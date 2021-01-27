@@ -16,4 +16,5 @@ public abstract class ActivationFunctionImpl implements ActivationFunction {
 
     public ActivationFunctionImpl() { }
 
+
 }

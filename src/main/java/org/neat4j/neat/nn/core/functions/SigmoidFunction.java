@@ -11,7 +11,9 @@ import org.neat4j.neat.nn.core.ActivationFunction;
  * @fixed Filippov
  */
 public class SigmoidFunction extends ActivationFunctionImpl {
-	
+
+	private static String functionName = "sigmoid(x)";
+
 	public SigmoidFunction() { this.factor = 1; }
 	
 	public SigmoidFunction(double factor) {
@@ -47,10 +49,10 @@ public class SigmoidFunction extends ActivationFunctionImpl {
 	}
 
 	public static String getStaticFunctionName(){
-		return "sigmoid(x)";
+		return functionName;
 	}
 
-	public  String getFunctionName(){
-		return "sigmoid(x)";
+	public String getFunctionName(){
+		return functionName;
 	}
 }

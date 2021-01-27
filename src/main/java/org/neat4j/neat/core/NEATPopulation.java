@@ -13,8 +13,6 @@ import org.neat4j.neat.nn.core.ActivationFunction;
 import org.neat4j.neat.nn.core.functions.ActivationFunctionContainer;
 import org.neat4j.neat.utils.RandomUtils;
 
-import java.util.Random;
-
 /**
  * @author MSimmerson
  *
@@ -28,22 +26,20 @@ public class NEATPopulation implements Population {
 	private int outputs;
 	private boolean featureSelection;
 	private int extraFeatureCount = 0;
-	private final Random random;
 
 
-	public NEATPopulation(int popSize, int initialChromoSize, int inputs, int outputs, boolean featureSelection, int extraFeaturecount, Random random) {
+	public NEATPopulation(int popSize, int initialChromoSize, int inputs, int outputs, boolean featureSelection, int extraFeaturecount) {
 		this.popSize = popSize;
 		this.initialChromoSize = initialChromoSize;
 		this.inputs = inputs;
 		this.outputs = outputs;
 		this.featureSelection = featureSelection;
 		this.extraFeatureCount = extraFeaturecount;
-		this.random = random;
 
 	}
 
-	public NEATPopulation(int popSize, int initialChromoSize, int inputs, int outputs, boolean featureSelection, Random random) {
-		this(popSize, initialChromoSize, inputs, outputs, featureSelection, 0, random);
+	public NEATPopulation(int popSize, int initialChromoSize, int inputs, int outputs, boolean featureSelection) {
+		this(popSize, initialChromoSize, inputs, outputs, featureSelection, 0);
 	}
 	
 	public Chromosome[] genoTypes() {
@@ -77,9 +73,9 @@ public class NEATPopulation implements Population {
 				nodeGene = (NEATNodeGene)templateGenes[i];
 
 				ActivationFunction activationFunction = null;
-				if(nodeGene.getType() == NEATNodeGene.TYPE.INPUT) activationFunction = activationFunctionContainer.getRandomInputActivationFunction(random);
-				else if(nodeGene.getType() == NEATNodeGene.TYPE.HIDDEN) activationFunction = activationFunctionContainer.getRandomHiddenActivationFunction(random);
-				else if(nodeGene.getType() == NEATNodeGene.TYPE.OUTPUT) activationFunction = activationFunctionContainer.getRandomOutputActivationFunction(random);
+				if(nodeGene.getType() == NEATNodeGene.TYPE.INPUT) activationFunction = activationFunctionContainer.getRandomInputActivationFunction();
+				else if(nodeGene.getType() == NEATNodeGene.TYPE.HIDDEN) activationFunction = activationFunctionContainer.getRandomHiddenActivationFunction();
+				else if(nodeGene.getType() == NEATNodeGene.TYPE.OUTPUT) activationFunction = activationFunctionContainer.getRandomOutputActivationFunction();
 
 
 

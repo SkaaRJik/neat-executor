@@ -92,11 +92,11 @@ public class NEATNeuralNet implements NeuralNet {
 		if (neuron.neuronType() == NEATNodeGene.TYPE.INPUT) {
 			inputPattern = new double[1];
 			// match the input column to the input node, id's start from 1
-			inputPattern[0] = netInput.pattern()[neuron.id() - 1];
+			inputPattern[0] = netInput.pattern()[neuron.getID() - 1];
 		} else {
 			inputPattern = new double[sourceNodes.length];
 			for (i = 0; i < sourceNodes.length; i++) {
-				if (neuron.id() == ((NEATNeuron)sourceNodes[i]).id()) {				
+				if (neuron.getID() == ((NEATNeuron)sourceNodes[i]).getID()) {
 					// Self Recurrent
 					//logger.debug("Self Recurrent:" + neuron.id() + ":" + ((NEATNeuron)sourceNodes.get(i)).id());
 					inputPattern[i] = neuron.lastActivation();
@@ -178,7 +178,7 @@ public class NEATNeuralNet implements NeuralNet {
 			neuron = new NEATNeuron(gene.getActivationFunction(), gene.id(), gene.getType(), gene.getLabel());
 			//neuron.setActivationFunction(gene.getActivationFunction());
 			neuron.modifyBias(gene.bias(), 0, true);
-			tempNeurons.put(neuron.id(), neuron);
+			tempNeurons.put(neuron.getID(), neuron);
 		}
 		return tempNeurons;
 	}

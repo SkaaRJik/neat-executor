@@ -68,4 +68,6 @@ public class Synapse implements Serializable{
 				"\nenabled=" + enabled +
 				"\n}";
 	}
+
+
 }

@@ -9,6 +9,8 @@ import org.neat4j.neat.nn.core.ActivationFunction;
 
 public class ArctgFunction extends ActivationFunctionImpl {
 
+    private static String functionName = "arctg(x)";
+
     public ArctgFunction(double factor) { this.factor = factor; }
 
     public ArctgFunction() { this.factor = 1; }
@@ -30,10 +32,12 @@ public class ArctgFunction extends ActivationFunctionImpl {
     }
 
     public static String getStaticFunctionName(){
-        return "arctg(x)";
+        return functionName;
     }
 
     public String getFunctionName(){
-        return "arctg(x)";
+        return functionName;
     }
+
+
 }

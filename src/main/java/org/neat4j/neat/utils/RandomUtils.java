@@ -15,7 +15,7 @@ import java.util.Random;
  */
 public class RandomUtils
 {
-	private static  Random rand = new Random();
+	private static  Random rand;
     private RandomUtils() {
     }
     

@@ -78,7 +78,6 @@ public class NEATNetManagerForService implements AIController {
 	}
 
 	public List<NetworkDataSet>  dataSet() {
-		logger.warn("dataSet");
 		int trainEndIndex = this.normalizedDataDto.getTrainEndIndex();
 		int testEndIndex = this.normalizedDataDto.getTestEndIndex();
 
@@ -86,11 +85,7 @@ public class NEATNetManagerForService implements AIController {
 		int inputs = (int) config.getConfigElementByName("INPUT.NODES");
 		int outputs = (int) config.getConfigElementByName("OUTPUT.NODES");
 
-
-
 		dSet = new JsonDataConverter(normalizedDataDto, inputs, outputs, trainEndIndex, testEndIndex).loadData();
-
-
 
 		return (dSet);
 	}

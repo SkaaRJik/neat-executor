@@ -8,6 +8,8 @@ import org.neat4j.neat.nn.core.ActivationFunction;
  */
 public class LinearFunction extends ActivationFunctionImpl {
 
+	private static String functionName = "y=x";
+
 	public LinearFunction(double factor) { this.factor = factor; }
 	public LinearFunction() {this.factor = 1; }
 	public double activate(double neuronIp) {
@@ -23,9 +25,10 @@ public class LinearFunction extends ActivationFunctionImpl {
 	}
 
 	public static String getStaticFunctionName(){
-		return "y=x";
+		return functionName;
 	}
+
 	public String getFunctionName(){
-		return "y=x";
+		return functionName;
 	}
 }

@@ -17,7 +17,6 @@ import org.neat4j.neat.nn.core.functions.ActivationFunctionContainer;
 import org.neat4j.neat.utils.RandomUtils;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * @author MSimmerson
@@ -42,15 +41,12 @@ public class NEATMutator implements Mutator {
 
 
 	private static final int MAX_LINK_ATTEMPTS = 5;
-	private final Random random;
 
-	public NEATMutator(Random random, InnovationDatabase innovationDatabase) {
-		this.random = random;
+	public NEATMutator(InnovationDatabase innovationDatabase) {
 		this.innovationDatabase = innovationDatabase;
 	}
 	
-	public NEATMutator(double pAddNode, double pAddLink, double pDisable, double pNewActivationFunction, Random random, InnovationDatabase innovationDatabase, ActivationFunctionContainer activationFunctionContainer) {
-		this.random = random;
+	public NEATMutator(double pAddNode, double pAddLink, double pDisable, double pNewActivationFunction, InnovationDatabase innovationDatabase, ActivationFunctionContainer activationFunctionContainer) {
 		this.pAddNode = pAddNode;
 		this.pAddLink = pAddLink;
 		this.pToggle = pDisable;
@@ -100,48 +96,48 @@ public class NEATMutator implements Mutator {
 	}
 	
 	private Gene mutateFeature(NEATFeatureGene mutatee) {
-		double perturbRandVal = random.nextDouble();
+		double perturbRandVal = RandomUtils.getRand().nextDouble();
 		Gene mutated = mutatee;
 		if (perturbRandVal < this.pPerturb) {
 			mutated = new NEATFeatureGene(mutatee.getInnovationNumber(), mutatee.geneAsNumber().doubleValue() + RandomUtils.nextClampedDouble(-perturb, perturb));
 		}
-		
+
 		return (mutated);
 	}
-	
+
 	private Gene mutateLink(NEATLinkGene mutatee) {
-		double perturbRandVal = random.nextDouble();
-		double disableRandVal = random.nextDouble();
+		double perturbRandVal = RandomUtils.getRand().nextDouble();
+		double disableRandVal = RandomUtils.getRand().nextDouble();
 		double newWeight;
 		NEATLinkGene mutated = mutatee;
 
 		if (perturbRandVal < this.pPerturb) {
-			if (this.pWeightReplaced > random.nextDouble()) {
+			if (this.pWeightReplaced > RandomUtils.getRand().nextDouble()) {
 				newWeight = RandomUtils.nextPlusMinusOne();
 			} else {
 				newWeight = mutatee.getWeight() + RandomUtils.nextClampedDouble(-perturb, perturb);
 			}
-//			newWeight = mutatee.getWeight() + MathUtils.nextClampedDouble(-PERTURB, PERTURB);				
-			mutated = new NEATLinkGene(mutatee.getInnovationNumber(), 
+//			newWeight = mutatee.getWeight() + MathUtils.nextClampedDouble(-PERTURB, PERTURB);
+			mutated = new NEATLinkGene(mutatee.getInnovationNumber(),
 									   mutatee.isEnabled(),
 									   mutatee.getFromId(),
 									   mutatee.getToId(),
 									   newWeight);
 		}
-		
+
 		if (disableRandVal < this.pToggle) {
 			if (this.featureSelection) {
 				mutated.setEnabled(!mutated.isEnabled());
 			}
 		}
-		
+
 		return (mutated);
 	}
 	//TODO Add mutation of activation function and dont forget to see what way of saving getNeurons is.
 	private Gene mutateNode(NEATNodeGene mutatee) {
-		double perturbRandVal = random.nextDouble();
-		double mutateBias = random.nextDouble();
-		double mutateFunctionRandVal = random.nextDouble();
+		double perturbRandVal = RandomUtils.getRand().nextDouble();
+		double mutateBias = RandomUtils.getRand().nextDouble();
+		double mutateFunctionRandVal = RandomUtils.getRand().nextDouble();
 		NEATNodeGene mutated = mutatee;
 		double newSF = mutatee.sigmoidFactor();
 		double newBias = mutatee.bias();
@@ -152,7 +148,7 @@ public class NEATMutator implements Mutator {
 			if(mutated.getType() == NEATNodeGene.TYPE.INPUT) {
 				if(this.innovationDatabase.getActivationFunctionContainer().getInputActivationFunctions().size() > 1) {
 					do{
-						activationFunction = this.innovationDatabase.getActivationFunctionContainer().getRandomInputActivationFunction(random);
+						activationFunction = this.innovationDatabase.getActivationFunctionContainer().getRandomInputActivationFunction();
 					}
 					while (activationFunction.getFunctionName().equals(lastActivationFunction.getFunctionName()));
 
@@ -161,14 +157,14 @@ public class NEATMutator implements Mutator {
 			else if(mutated.getType() == NEATNodeGene.TYPE.HIDDEN){
 				if(this.innovationDatabase.getActivationFunctionContainer().getHiddenActivationFunctions().size() > 1)
 					do{
-						activationFunction = this.innovationDatabase.getActivationFunctionContainer().getRandomHiddenActivationFunction(random);
+						activationFunction = this.innovationDatabase.getActivationFunctionContainer().getRandomHiddenActivationFunction();
 					}
 					while (activationFunction.getFunctionName().equals(lastActivationFunction.getFunctionName()));
 			}
 			else if(mutated.getType() == NEATNodeGene.TYPE.OUTPUT){
 				if(this.innovationDatabase.getActivationFunctionContainer().getOutputActivationFunctions().size() > 1)
 					do{
-						activationFunction = this.innovationDatabase.getActivationFunctionContainer().getRandomOutputActivationFunction(random);
+						activationFunction = this.innovationDatabase.getActivationFunctionContainer().getRandomOutputActivationFunction();
 					}
 					while (activationFunction.getFunctionName().equals(lastActivationFunction.getFunctionName()));
 			}
@@ -181,29 +177,29 @@ public class NEATMutator implements Mutator {
 			newSF = mutatee.sigmoidFactor() + RandomUtils.nextClampedDouble(-perturb, perturb);
 			mutated = new NEATNodeGene(mutated.getInnovationNumber(), mutated.id(), newSF, mutated.getType(), mutated.getLabel(),mutated.bias(), mutated.getActivationFunction());
 		}
-		
+
 		if (mutateBias < this.pMutateBias) {
 			newBias += RandomUtils.nextClampedDouble(-biasPerturb, biasPerturb);
 			mutated = new NEATNodeGene(mutated.getInnovationNumber(), mutated.id(), mutated.sigmoidFactor(), mutated.getType(), mutated.getLabel(),newBias, mutated.getActivationFunction());
 		}
-		
+
 		return (mutated);
 	}
-	
+
 	private boolean linkIllegal(NEATNodeGene from, NEATNodeGene to, ArrayList links) {
 		boolean illegal = false;
 		int idx = 0;
 		NEATLinkGene linkGene;
-		
+
 		if ((to.getType() == NEATNodeGene.TYPE.INPUT)){
 			illegal = true;
 		} else {
 			while (!illegal && (idx < links.size())) {
-				linkGene = (NEATLinkGene)links.get(idx);				
+				linkGene = (NEATLinkGene)links.get(idx);
 //				if ((linkGene.getFromId() == from.id() && linkGene.getToId() == to.id()) || ((to.getDepth() <= from.getDepth()) && !this.recurrencyAllowed)) {
 				if ((linkGene.getFromId() == from.id() && linkGene.getToId() == to.id())) {
 					illegal = true;
-				}			
+				}
 				idx++;
 			}
 		}
@@ -212,7 +208,7 @@ public class NEATMutator implements Mutator {
 	}
 
 	private void mutateAddLink(Chromosome mutatee) {
-		double linkRandVal = random.nextDouble();
+		double linkRandVal = RandomUtils.getRand().nextDouble();
 		NEATNodeGene from;
 		NEATNodeGene to;
 		int rIdx;
@@ -222,18 +218,18 @@ public class NEATMutator implements Mutator {
 		Gene[] genes = new Gene[mutatee.size() + 1];
 		System.arraycopy(mutatee.genes(), 0, genes, 0, mutatee.genes().length);
 		Gene newLink = null;
-		
+
 		if (linkRandVal < this.pAddLink) {
 			nodes = this.candidateNodes(mutatee.genes());
 			links = this.candidateLinks(mutatee.genes(), false);
 			// find a new available link
 			while (newLink == null && i < MAX_LINK_ATTEMPTS) {
-				rIdx = random.nextInt(nodes.size());
+				rIdx = RandomUtils.getRand().nextInt(nodes.size());
 				from = ((NEATNodeGene)nodes.get(rIdx));
-				rIdx = random.nextInt(nodes.size());
+				rIdx = RandomUtils.getRand().nextInt(nodes.size());
 				to = ((NEATNodeGene)nodes.get(rIdx));
 				if (!this.linkIllegal(from, to, links)) {
-					// set it to a random value
+					// set it to a RandomUtils.getRand() value
 					newLink = innovationDatabase.submitLinkInnovation(from.id(), to.id());
 					((NEATLinkGene)newLink).setWeight(RandomUtils.nextPlusMinusOne());
 					// add link between 2 unconnected nodes
@@ -243,10 +239,10 @@ public class NEATMutator implements Mutator {
 				i++;
 			}
 		}
-	}	
-	
+	}
+
 	private void mutateAddNode(Chromosome mutatee) {
-		double nodeRandVal = random.nextDouble();
+		double nodeRandVal = RandomUtils.getRand().nextDouble();
 		ArrayList nodeLinks;
 		//ArrayList nodes;
 		NEATLinkGene chosen;
@@ -258,14 +254,14 @@ public class NEATMutator implements Mutator {
 		Gene[] newChromo = new Gene[newChromoIdx + 2];
 		System.arraycopy(mutatee.genes(), 0, newChromo, 0, newChromoIdx);
 		int linkIdx;
-				
+
 		if (nodeRandVal < this.pAddNode) {
 			// add a node on an existing enabled connection
 			// find an existing connection to intercept
 			nodeLinks = this.candidateLinks(mutatee.genes(), true);
 			if (nodeLinks.size() > 0) {
 				// ensure there is a link to split
-				linkIdx = random.nextInt(nodeLinks.size());
+				linkIdx = RandomUtils.getRand().nextInt(nodeLinks.size());
 				chosen = (NEATLinkGene)nodeLinks.get(linkIdx);
 				// disable old link
 				chosen.setEnabled(false);

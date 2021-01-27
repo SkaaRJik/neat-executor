@@ -12,4 +12,6 @@ public interface ActivationFunction extends Serializable
 	public double derivative(double neuronIp);
 	ActivationFunction newInstance();
 	String getFunctionName();
+
+
 }
