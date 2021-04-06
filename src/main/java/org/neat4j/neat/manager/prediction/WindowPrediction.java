@@ -11,6 +11,7 @@ import org.neat4j.neat.data.set.InputImpl;
 import org.neat4j.neat.ga.core.Chromosome;
 import org.neat4j.neat.manager.train.NEATTrainingForService;
 import ru.filippov.neatexecutor.entity.*;
+import ru.filippov.neatexecutor.exception.IncorrectFileFormatException;
 import ru.filippov.neatexecutor.rabbitmq.RabbitMQWriter;
 
 import java.io.IOException;
@@ -151,7 +152,7 @@ public class WindowPrediction implements Callable<WindowPredictionResult> {
         //predictedWindowDatas = new Double[dataKeeper.getData().size()-windowsSize][inputs];
     }
 
-    public ProjectConfig.NormalizedDataDto prepareDataForWindow(int index){
+    public ProjectConfig.NormalizedDataDto prepareDataForWindow(int index) throws IOException, IncorrectFileFormatException {
 
         Double[] columnData = new Double[this.parsedData.length];
 
@@ -228,8 +229,9 @@ public class WindowPrediction implements Callable<WindowPredictionResult> {
     public Runnable train(int index){
         AIConfig aiConfig = new NEATConfig(this.baseAiConfig);
         Runnable runnable = () -> {
-            ProjectConfig.NormalizedDataDto normalizedDataDto = prepareDataForWindow(index);
+
             try {
+                ProjectConfig.NormalizedDataDto normalizedDataDto = prepareDataForWindow(index);
                 trainer[index] = new NEATTrainingForService(aiConfig, normalizedDataDto, 1);
                 inputThreads[index] = new WindowTrainThread(index, trainer[index]);
                 inputThreads[index].startTraining();
@@ -241,6 +243,8 @@ public class WindowPrediction implements Callable<WindowPredictionResult> {
             } catch (InterruptedException e) {
                 logger.error(String.format("WindowPrediction.train [index]=%d", index), e);
             } catch (ExecutionException e) {
+                logger.error(String.format("WindowPrediction.train [index]=%d", index), e);
+            } catch (IncorrectFileFormatException e) {
                 logger.error(String.format("WindowPrediction.train [index]=%d", index), e);
             }
         };

@@ -13,6 +13,7 @@ import org.neat4j.neat.manager.train.NEATTrainingForService;
 import org.neat4j.neat.utils.NetTopology;
 import org.neat4j.neat.utils.NetTopologyAnalyzer;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import ru.filippov.neatexecutor.samba.SambaWorker;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -33,13 +34,22 @@ public class RabbitMQListener {
     @Autowired
     private RabbitConfig rabbitConfig;
 
-    @RabbitListener(queues = "${rabbitmq.input.queue.experiment:experiment}")
+    @Autowired
+    private SambaWorker sambaWorker;
+
+    @RabbitListener(queues = "${rabbitmq.input.predictionData.queue.queueName:prediction-data}")
     public void consumeNewNeatConfig(NeatConfigEntity neatConfigEntity) throws IOException {
 
         /*final NeatConfigEntity neatConfigEntity = objectMapper.readValue(message.getBody(), NeatConfigEntity.class);
 */
 
+
+
+
+
         try {
+            byte[] bytes = sambaWorker.readFile(neatConfigEntity.getDataFilename());
+            neatConfigEntity.setNormalizedData(new ProjectConfig.NormalizedDataDto(bytes, neatConfigEntity.getColumns(), neatConfigEntity.getTrainEndIndex(), neatConfigEntity.getTestEndIndex()));
             log.info("Training");
             AIConfig aiConfig = NEATTrainingForService.parseNeatSetting(neatConfigEntity.getNeatSettings());
             NEATTrainingForService neatGaTrainingManager = new NEATTrainingForService(aiConfig, neatConfigEntity.getNormalizedData());
@@ -64,7 +74,7 @@ public class RabbitMQListener {
                     neatGaTrainingManager.getBestChromosome(),
                     neatConfigEntity,
                     this.rabbitMQWriter,
-                    this.rabbitConfig.RABBITMQ_OUTPUT_STATUS_ROUTING_KEY);
+                    this.rabbitConfig.RABBITMQ_OUTPUT_PREDICTION_STATUS_ROUTING_KEY);
             Future<WindowPredictionResult> future = executor.submit(windowPrediction);
 
             WindowPredictionResult windowPredictionResult = future.get();
@@ -76,7 +86,7 @@ public class RabbitMQListener {
 
             ServiceResult serviceResult = new ServiceResult(neatConfigEntity.getProjectId(), trainResults, netTopology, windowPredictionResult);
 
-            this.rabbitMQWriter.sendMessage(rabbitConfig.RABBITMQ_OUTPUT_RESULT_ROUTING_KEY, serviceResult);
+            this.rabbitMQWriter.sendMessage(rabbitConfig.RABBITMQ_OUTPUT_PREDICTION_RESULT_ROUTING_KEY, serviceResult);
 
 
 

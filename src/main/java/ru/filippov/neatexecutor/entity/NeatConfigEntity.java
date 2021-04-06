@@ -20,10 +20,15 @@ public class NeatConfigEntity {
 
     private Long neatConfigId;
     private Long projectId;
-    private ProjectConfig.NormalizedDataDto normalizedData;
+    private String dataFilename;
+    private List<ColumnsDto> columns;
+    private Integer trainEndIndex;
+    private Integer testEndIndex;
     private List<NeatSetting> neatSettings;
     private Short predictionWindowSize;
     private Short predictionPeriod;
+    private ProjectConfig.NormalizedDataDto normalizedData;
+
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class NeatSetting {
