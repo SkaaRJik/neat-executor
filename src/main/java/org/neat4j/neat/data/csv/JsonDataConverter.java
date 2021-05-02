@@ -8,7 +8,6 @@ import ru.filippov.neatexecutor.entity.ProjectConfig;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 public class JsonDataConverter {
     private static final Logger logger = LogManager.getLogger(JsonDataConverter.class);

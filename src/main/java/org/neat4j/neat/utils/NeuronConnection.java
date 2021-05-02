@@ -2,7 +2,6 @@ package org.neat4j.neat.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.neat4j.neat.nn.core.Neuron;
 import org.neat4j.neat.nn.core.Synapse;
 
 @Data

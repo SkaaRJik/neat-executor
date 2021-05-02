@@ -7,7 +7,6 @@ package org.neat4j.neat.nn.core;
 import org.neat4j.neat.data.core.NetworkDataSet;
 
 import java.io.Serializable;
-import java.util.HashMap;
 
 /**
  * @author MSimmerson

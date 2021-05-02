@@ -7,7 +7,6 @@ package org.neat4j.neat.data.set;
 import org.neat4j.neat.data.core.ExpectedOutputSet;
 import org.neat4j.neat.data.core.NetworkOutput;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

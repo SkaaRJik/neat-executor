@@ -13,7 +13,6 @@ import org.neat4j.core.AIController;
 import org.neat4j.core.InitialisationFailedException;
 import org.neat4j.neat.core.NEATNetDescriptor;
 import org.neat4j.neat.data.core.NetworkDataSet;
-import org.neat4j.neat.data.csv.CSVDataLoader;
 import org.neat4j.neat.data.csv.JsonDataConverter;
 import org.neat4j.neat.ga.core.Chromosome;
 import org.neat4j.neat.nn.core.*;

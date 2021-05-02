@@ -2,12 +2,7 @@ package ru.filippov.neatexecutor.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -16,10 +11,13 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class NeatConfigEntity {
+@ToString
+public class ExperimentConfigEntity {
 
-    private Long neatConfigId;
+    private Long experimentId;
     private Long projectId;
+    private String username;
+    private String projectName;
     private String dataFilename;
     private List<ColumnsDto> columns;
     private Integer trainEndIndex;
@@ -27,6 +25,7 @@ public class NeatConfigEntity {
     private List<NeatSetting> neatSettings;
     private Short predictionWindowSize;
     private Short predictionPeriod;
+    @ToString.Exclude
     private ProjectConfig.NormalizedDataDto normalizedData;
 
 

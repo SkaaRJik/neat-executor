@@ -10,9 +10,11 @@ import org.neat4j.neat.data.core.NetworkOutputSet;
 import org.neat4j.neat.data.set.InputImpl;
 import org.neat4j.neat.ga.core.Chromosome;
 import org.neat4j.neat.manager.train.NEATTrainingForService;
-import ru.filippov.neatexecutor.entity.*;
+import ru.filippov.neatexecutor.entity.ColumnsDto;
+import ru.filippov.neatexecutor.entity.ExperimentConfigEntity;
+import ru.filippov.neatexecutor.entity.ProjectConfig;
+import ru.filippov.neatexecutor.entity.WindowPredictionResult;
 import ru.filippov.neatexecutor.exception.IncorrectFileFormatException;
-import ru.filippov.neatexecutor.rabbitmq.RabbitMQWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,9 +26,7 @@ import java.util.concurrent.*;
 
 public class WindowPrediction implements Callable<WindowPredictionResult> {
     private final static Logger logger = Logger.getLogger(WindowPrediction.class);
-/*    DataKeeper dataKeeper;
-    DataKeeper[] dataForWindow;
-    DataKeeper[] dataFromWindows;*/
+
     private AIConfig baseAiConfig;
     private ProjectConfig.NormalizedDataDto normalizedData;
     private int windowsSize = 0;
@@ -48,36 +48,29 @@ public class WindowPrediction implements Callable<WindowPredictionResult> {
 
     private List<Map<String, Object>> factorSigns;
     private List<Map<String, Object>> targetSigns;
-    private RabbitMQWriter rabbitMQWriter;
+
 
     private WindowTrainThread[] inputThreads;
 
-    private Long neatConfigId;
-    private Long projectId;
-    private String brokerStatusKey;
 
-    public WindowPrediction(Long neatConfigId, Long projectId, Chromosome trainedModel, NeatConfigEntity neatConfigEntity, RabbitMQWriter rabbitMQWriter, String brokerStatusKey) throws IOException, InitialisationFailedException {
-        this.neatConfigId = neatConfigId;
-        this.projectId = projectId;
-        this.brokerStatusKey = brokerStatusKey;
-        this.windowsSize = neatConfigEntity.getPredictionWindowSize();
-        //this.yearPrediction = neatConfigEntity.getPredictionPeriod();
+    public WindowPrediction(Chromosome trainedModel, ExperimentConfigEntity experimentConfigEntity) throws IOException, InitialisationFailedException {
+        this.windowsSize = experimentConfigEntity.getPredictionWindowSize();
+        this.yearPrediction = experimentConfigEntity.getPredictionPeriod();
         this.trainedModel = trainedModel;
-        this.rabbitMQWriter = rabbitMQWriter;
-        this.initialise(neatConfigEntity);
+        this.initialise(experimentConfigEntity);
     }
 
     public NEATTrainingForService getTrainer(int index){
         return this.trainer[index];
     }
 
-    public void initialise(NeatConfigEntity neatConfigEntity) throws IOException, InitialisationFailedException {
+    public void initialise(ExperimentConfigEntity experimentConfigEntity) throws IOException, InitialisationFailedException {
 
-        AIConfig aiConfig = NEATTrainingForService.parseNeatSetting(neatConfigEntity.getNeatSettings());
+        AIConfig aiConfig = NEATTrainingForService.parseNeatSetting(experimentConfigEntity.getNeatSettings());
 
         this.neatNeuralNet = NEATNeuralNet.createNet(new NEATConfig(aiConfig), this.trainedModel);
 
-        this.normalizedData = neatConfigEntity.getNormalizedData();
+        this.normalizedData = experimentConfigEntity.getNormalizedData();
         this.numOfInputs = (int) aiConfig.getConfigElementByName("INPUT.NODES");
         this.numOfOutputs = (int) aiConfig.getConfigElementByName("OUTPUT.NODES");
         this.totalParams = this.numOfInputs +  this.numOfOutputs;
@@ -196,8 +189,6 @@ public class WindowPrediction implements Callable<WindowPredictionResult> {
     @Override
     public WindowPredictionResult call() throws ExecutionException, InterruptedException {
 
-        rabbitMQWriter.sendMessage(this.brokerStatusKey,
-                new ExperimentStatusDto(this.projectId, "PREDICT_FACTOR_SIGNS"));
         startTime = System.currentTimeMillis();
         ExecutorService executor = Executors.newCachedThreadPool();
         List<Future<?>> futureList = new ArrayList<>();
@@ -215,7 +206,6 @@ public class WindowPrediction implements Callable<WindowPredictionResult> {
         }
 
         executor.shutdown();
-        rabbitMQWriter.sendMessage(this.brokerStatusKey, new ExperimentStatusDto(this.projectId, "PREDICTION"));
         WindowPredictionResult predict = null;
         try {
             predict = predict(neatNeuralNet);

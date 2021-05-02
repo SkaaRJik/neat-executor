@@ -23,8 +23,8 @@ class NeatExecutorApplicationTests {
 	void setSambaWork() throws Exception {
 
 
-		byte[] bytes = sambaWorker.readFile("data.csv");
-		sambaWorker.writeBytesArray("test.csv", bytes);
+		byte[] bytes = sambaWorker.readFile("data.xlsx");
+		sambaWorker.writePredictionResultFile(bytes, "test", 0L, "test");
 	}
 
 }

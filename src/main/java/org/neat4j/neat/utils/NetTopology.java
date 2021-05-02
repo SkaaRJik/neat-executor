@@ -1,8 +1,5 @@
 package org.neat4j.neat.utils;
 
-import org.neat4j.neat.core.NEATNeuron;
-import org.neat4j.neat.nn.core.Synapse;
-
 import java.util.List;
 
 public class NetTopology {

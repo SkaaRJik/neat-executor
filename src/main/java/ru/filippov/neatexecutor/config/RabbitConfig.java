@@ -12,7 +12,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.filippov.neatexecutor.entity.NeatConfigEntity;
+import ru.filippov.neatexecutor.entity.ExperimentConfigEntity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -120,7 +120,7 @@ public class RabbitConfig {
         DefaultClassMapper classMapper = new DefaultClassMapper();
         Map<String, Class<?>> idClassMapping = new HashMap<>();
         classMapper.setTrustedPackages("ru.filippov.neat.dto.*");
-        idClassMapping.put("ru.filippov.neat.dto.ExperimentData", NeatConfigEntity.class);
+        idClassMapping.put("ru.filippov.neat.dto.ExperimentData", ExperimentConfigEntity.class);
         classMapper.setIdClassMapping(idClassMapping);
         return classMapper;
     }

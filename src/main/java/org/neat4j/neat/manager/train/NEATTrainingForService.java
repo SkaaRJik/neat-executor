@@ -9,30 +9,30 @@ import org.neat4j.neat.core.InnovationDatabase;
 import org.neat4j.neat.core.NEATConfig;
 import org.neat4j.neat.core.NEATGADescriptor;
 import org.neat4j.neat.core.NEATGeneticAlgorithm;
-import org.neat4j.neat.core.control.NEATNetManager;
 import org.neat4j.neat.core.control.NEATNetManagerForService;
 import org.neat4j.neat.core.fitness.InvalidFitnessFunction;
 import org.neat4j.neat.core.fitness.MSENEATFitnessFunction;
 import org.neat4j.neat.core.mutators.NEATMutator;
 import org.neat4j.neat.core.pselectors.TournamentSelector;
 import org.neat4j.neat.core.xover.NEATCrossover;
-import org.neat4j.neat.data.core.DataKeeper;
 import org.neat4j.neat.data.core.NetworkDataSet;
 import org.neat4j.neat.ga.core.*;
 import org.neat4j.neat.nn.core.LearningEnvironment;
 import org.neat4j.neat.nn.core.NeuralNet;
 import org.neat4j.neat.utils.NumberUtils;
 import org.neat4j.neat.utils.RandomUtils;
-import ru.filippov.neatexecutor.entity.NeatConfigEntity;
+import ru.filippov.neatexecutor.entity.ExperimentConfigEntity;
 import ru.filippov.neatexecutor.entity.ProjectConfig;
-import ru.filippov.neatexecutor.entity.TrainResult;
 import ru.filippov.neatexecutor.rabbitmq.RabbitMQWriter;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class NEATTrainingForService implements Runnable {
     private static final Logger logger = LogManager.getLogger(NEATTrainingForService.class);
@@ -81,7 +81,7 @@ public class NEATTrainingForService implements Runnable {
         this.evolve();
     }
 
-    public static AIConfig parseNeatSetting(List<NeatConfigEntity.NeatSetting> neatSettings) {
+    public static AIConfig parseNeatSetting(List<ExperimentConfigEntity.NeatSetting> neatSettings) {
 
         AIConfig aiConfig = new NEATConfig();
         neatSettings.stream()
@@ -251,10 +251,12 @@ public class NEATTrainingForService implements Runnable {
         return timeSpend;
     }
 
-    public TrainResult getTrainResults() {
-        return new TrainResult(this.getBestChromosome().getTrainError(),
-                this.getBestChromosome().getValidationError(),
-                this.timeSpend);
+    public List<Double> getTrainErrors() {
+        return this.bestEverChromosomes.stream().map(Chromosome::getTrainError).collect(Collectors.toList());
+    }
+
+    public List<Double> getTestErrors() {
+        return this.bestEverChromosomes.stream().map(Chromosome::getValidationError).collect(Collectors.toList());
     }
 
     public void setConfigId(Long configId) {
