@@ -206,14 +206,14 @@ public class WindowPrediction implements Callable<WindowPredictionResult> {
         }
 
         executor.shutdown();
-        WindowPredictionResult predict = null;
+        WindowPredictionResult windowPredictionResult = null;
         try {
-            predict = predict(neatNeuralNet);
+            windowPredictionResult = predict(neatNeuralNet);
         } catch (InitialisationFailedException e) {
             logger.error("WindowPrediction.call", e);
         }
 
-        return predict;
+        return windowPredictionResult;
     }
 
     public Runnable train(int index){
@@ -360,25 +360,15 @@ public class WindowPrediction implements Callable<WindowPredictionResult> {
             this.outputData.add(netOutputs);
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
-
-        this.outputData.stream().forEach(doubles -> {
-            doubles.forEach(aDouble -> {
-                stringBuilder.append(aDouble);
-                stringBuilder.append(" ");
-            });
-            stringBuilder.append("\n");
-        });
-
-        System.out.println(stringBuilder.toString());
-
         long timeSpent = System.currentTimeMillis() - this.startTime;
         for (List<Double> outs: this.outputData) {
             for (int i = 0; i < outs.size(); i++) {
                 ((List<Double>)this.targetSigns.get(i).get("data")).add(outs.get(i));
             }
         }
-        return new WindowPredictionResult(timeSpent, this.predictionError, this.factorSigns, this.targetSigns);
+        WindowPredictionResult windowPredictionResult = new WindowPredictionResult(timeSpent, this.predictionError, this.factorSigns, this.targetSigns);
+
+        return windowPredictionResult;
 
     }
 

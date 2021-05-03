@@ -55,15 +55,15 @@ public class ProjectConfig {
             String[] columnsNames = new String[columns.size()];
 
             for (ColumnsDto columnsDto : columns) {
-                dataMap.put(columnsDto.getColumnName(), columnsDto);
+                dataMap.put(columnsDto.getColumnName().trim(), columnsDto);
                 if(columnsDto.getData() == null){
-                    columnsDto.setData(new ArrayList<>(1000));
+                    columnsDto.setData(new ArrayList<>(300));
                 }
             }
 
 
             while (stringTokenizer.hasMoreTokens()) {
-                final String header = stringTokenizer.nextToken();
+                final String header = stringTokenizer.nextToken().trim();
                 if(!dataMap.containsKey(header)){
                     throw new IOException("File and Columns names are mismatched!");
                 }

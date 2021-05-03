@@ -24,7 +24,7 @@ class NeatExecutorApplicationTests {
 
 
 		byte[] bytes = sambaWorker.readFile("data.xlsx");
-		sambaWorker.writePredictionResultFile(bytes, "test", 0L, "test");
+		sambaWorker.writePredictionResultFile(bytes, "test/test", 0L);
 	}
 
 }

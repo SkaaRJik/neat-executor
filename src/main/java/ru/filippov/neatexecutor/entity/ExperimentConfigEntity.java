@@ -17,7 +17,7 @@ public class ExperimentConfigEntity {
     private Long experimentId;
     private Long projectId;
     private String username;
-    private String projectName;
+    private String projectFolder;
     private String dataFilename;
     private List<ColumnsDto> columns;
     private Integer trainEndIndex;

@@ -13,6 +13,8 @@ public class WindowPredictionResult {
     public WindowPredictionResult(long timeSpent, Double predictionError, List<Map<String, Object>> factorSigns, List<Map<String, Object>> targetSigns) {
         this.timeSpent = timeSpent;
         this.predictionError = predictionError;
+        this.factorSigns = factorSigns;
+        this.targetSigns = targetSigns;
     }
 
     public long getTimeSpent() {

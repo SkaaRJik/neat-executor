@@ -9,6 +9,7 @@ import org.neat4j.neat.manager.prediction.WindowPrediction;
 import org.neat4j.neat.manager.train.NEATTrainingForService;
 import org.neat4j.neat.utils.NetTopology;
 import org.neat4j.neat.utils.NetTopologyAnalyzer;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,10 +46,10 @@ public class RabbitMQListener {
     private SambaWorker sambaWorker;
 
     @RabbitListener(queues = "${rabbitmq.input.predictionData.queue.queueName:prediction-data}")
-    public void consumeNewNeatConfig(ExperimentConfigEntity experimentConfigEntity) throws IOException {
+    public void consumeNewNeatConfig(Message message) throws IOException {
 
-        /*final NeatConfigEntity neatConfigEntity = objectMapper.readValue(message.getBody(), NeatConfigEntity.class);
-*/
+        final ExperimentConfigEntity experimentConfigEntity = objectMapper.readValue(message.getBody(), ExperimentConfigEntity.class);
+
         ServiceResult serviceResult = new ServiceResult(
                 experimentConfigEntity.getExperimentId(),
                 null,
@@ -91,7 +92,7 @@ public class RabbitMQListener {
             PredictionResultCsvConverter predictionResultCsvConverter = new PredictionResultCsvConverter();
             byte[] csvData = predictionResultCsvConverter.convert(windowPredictionResult);
 
-            String experimentResultFilename = sambaWorker.writePredictionResultFile(csvData, experimentConfigEntity.getProjectName(), experimentConfigEntity.getExperimentId(), experimentConfigEntity.getUsername());
+            String experimentResultFilename = sambaWorker.writePredictionResultFile(csvData, experimentConfigEntity.getProjectFolder(), experimentConfigEntity.getExperimentId());
             Map<String, List<Map<String,Object>>> windowTrainStatistic = new HashMap<>(2);
             List<Map<String, Object>> factorSigns = windowPredictionResult.getFactorSigns();
             List<Map<String, Object>> targetSigns = windowPredictionResult.getTargetSigns();

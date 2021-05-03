@@ -154,10 +154,9 @@ public class SambaWorker {
         return filePath;
     }
 
-    public String writePredictionResultFile(byte[] bytes, String projectName, Long experimentId, String username) throws IOException{
-        String directory = String.format("./%s/%s", username, projectName);
+    public String writePredictionResultFile(byte[] bytes, String projectFolder ,Long experimentId) throws IOException{
         String filename = String.format("result-%d.csv", experimentId);
-        return writeFileToNetworkFolder(bytes, directory, filename);
+        return writeFileToNetworkFolder(bytes, projectFolder, filename);
     }
 
 
@@ -171,7 +170,7 @@ public class SambaWorker {
         Set<AccessMask> accessMaskSet = new HashSet<AccessMask>();
         accessMaskSet.add(accessMask);
         File file;
-
+        filename = filename.charAt(0) == '/' ? filename.substring(1) : filename;
         file = diskShare.openFile(filename, accessMaskSet, null, shareAccess, createDisposition, createOptions);
         return file;
     }
