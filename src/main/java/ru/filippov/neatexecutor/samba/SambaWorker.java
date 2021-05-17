@@ -87,6 +87,7 @@ public class SambaWorker {
         fileBytes = in.readAllBytes();
         is.close();
         in.close();
+        file.close();
 
         return fileBytes;
 
@@ -121,6 +122,7 @@ public class SambaWorker {
         fos.write(bytes);
         fos.flush();
         fos.close();
+        file.close();
 
         return true;
     }

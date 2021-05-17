@@ -63,7 +63,7 @@ public class ProjectConfig {
 
 
             while (stringTokenizer.hasMoreTokens()) {
-                final String header = stringTokenizer.nextToken().trim();
+                final String header = stringTokenizer.nextToken();
                 if(!dataMap.containsKey(header)){
                     throw new IOException("File and Columns names are mismatched!");
                 }

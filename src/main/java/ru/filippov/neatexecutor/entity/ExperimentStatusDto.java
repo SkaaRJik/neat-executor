@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExperimentStatusDto {
+    Long experimentId;
     Long projectId;
     String status;
 }
