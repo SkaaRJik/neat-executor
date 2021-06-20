@@ -244,7 +244,9 @@ public class NEATTrainingForService implements Runnable {
     }
 
     public Chromosome getBestChromosome(){
-        return this.bestEverChromosomes.get(this.bestEverChromosomes.size()-1);
+        //return this.bestEverChromosomes.get(this.bestEverChromosomes.size()-1);
+
+        return this.bestEverChromosomes.stream().min((o1, o2) -> Double.compare(o1.getValidationError(), o1.getValidationError())).orElse(this.bestEverChromosomes.get(this.bestEverChromosomes.size()-1));
     }
 
     public long getTimeSpend() {

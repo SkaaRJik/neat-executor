@@ -366,6 +366,20 @@ public class WindowPrediction implements Callable<WindowPredictionResult> {
                 ((List<Double>)this.targetSigns.get(i).get("data")).add(outs.get(i));
             }
         }
+
+        for (int i = 0; i < this.factorSigns.size(); i++) {
+            List<Double> data = (List<Double>) this.factorSigns.get(i).get("data");
+            List<Double> newData = new ArrayList<>(data.size() + windowsSize);
+            for (int j = 0; j < windowsSize; j++) {
+                newData.add(null);
+            }
+            for (Double value: data) {
+                newData.add(value);
+            }
+
+            this.factorSigns.get(i).put("data",newData);
+        }
+
         WindowPredictionResult windowPredictionResult = new WindowPredictionResult(timeSpent, this.predictionError, this.factorSigns, this.targetSigns);
 
         return windowPredictionResult;

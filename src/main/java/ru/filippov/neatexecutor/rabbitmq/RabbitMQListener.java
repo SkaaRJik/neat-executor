@@ -118,48 +118,6 @@ public class RabbitMQListener {
 
 
 
-            /*List<List<NEATNeuron>> lists = this.analyseNeuronStructure((NEATNeuralNet) NEATNeuralNet.createNet(neatGaTrainingManager.getBestChromosome()));
-            lists.forEach(neatNeurons -> {
-                neatNeurons.forEach(neatNeuron -> System.out.print(neatNeuron.getLabel()+" | "));
-                System.out.println();
-            });
-            *//*Arrays.stream(neatGaTrainingManager.getBestChromosome().genes()).forEach(gene -> {
-                if(gene instanceof NEATNodeGene){
-                    if(((NEATNodeGene) gene).getType() == NEATNodeGene.TYPE.INPUT){
-                        System.out.println(((NEATNodeGene) gene).getLabel());
-                    }
-                }
-            });*/
-            /*Set<String> labels = new HashSet<>(20);
-
-            List<Gene> genes = new ArrayList<>(neatGaTrainingManager.getBestChromosome().size());
-            Arrays.stream(neatGaTrainingManager.getBestChromosome().genes()).forEach(gene -> {
-                if(gene instanceof NEATNodeGene){
-                    if(((NEATNodeGene) gene).getType() == NEATNodeGene.TYPE.INPUT){
-                        if(((NEATNodeGene) gene).getDepth() >= 0) {
-                            genes.add(gene);
-                            labels.add(((NEATNodeGene) gene).getLabel());
-                        }
-                    } else {
-                        genes.add(gene);
-                    }
-                } else {
-                    genes.add(gene);
-                }
-            });
-            List<ColumnsDto> collect = neatConfigEntity.getNormalizedData().getColumns().stream().filter(columnsDto -> labels.contains(columnsDto.getColumnName())).collect(Collectors.toList());
-
-            neatConfigEntity.getNormalizedData().setColumns(collect);
-
-            Chromosome chromosome = new NEATChromosome(genes.toArray(Gene[]::new));
-
-            new WindowPrediction(chromosome, neatConfigEntity).run();*/
-
-
-
-
-
-
 
         } catch (InitialisationFailedException e) {
             log.error("[NeatDataListener].consumeNewNeatConfig(), experimentConfigEntity = " + experimentConfigEntity.toString(), e);

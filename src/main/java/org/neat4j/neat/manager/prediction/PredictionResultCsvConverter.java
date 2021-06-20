@@ -29,7 +29,7 @@ public class PredictionResultCsvConverter {
 
         stringBuilder.append("\n");
 
-        int maxRowIndex = ((List<Double>)factorSigns.get(0).get("data")).size();
+        int maxRowIndex = ((List<Double>)targetSigns.get(0).get("data")).size();
 
         for (int i = 0; i < maxRowIndex; i++) {
             for (int j = 0; j < factorSigns.size(); j++) {
